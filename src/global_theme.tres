@@ -1,11 +1,34 @@
-[gd_resource type="Theme" load_steps=8 format=3 uid="uid://bhttketftlysp"]
+[gd_resource type="Theme" load_steps=13 format=3 uid="uid://bhttketftlysp"]
 
 [ext_resource type="Texture2D" uid="uid://b3j5t5dtouj45" path="res://assets/panel-texture.png" id="1_hanp0"]
+[ext_resource type="Texture2D" uid="uid://c3gaivsyodypf" path="res://assets/panel-texture-clicked.png" id="2_dstrx"]
 [ext_resource type="FontFile" uid="uid://vf6yvj2lvqpc" path="res://assets/fonts/Fira_Code/static/FiraCode-Bold.ttf" id="2_hmq0m"]
+[ext_resource type="Texture2D" uid="uid://djy7ab3ky2i2l" path="res://assets/panel-texture-hovered.png" id="2_vlwff"]
 [ext_resource type="FontFile" uid="uid://kc4hnm1j4fxk" path="res://assets/fonts/Fira_Code/static/FiraCode-Medium.ttf" id="3_swvbi"]
 [ext_resource type="FontFile" uid="uid://b5skvr8ealnht" path="res://assets/fonts/Bona_Nova_SC/BonaNovaSC-Bold.ttf" id="4_hijak"]
 [ext_resource type="FontFile" uid="uid://bb122o3gnfkmh" path="res://assets/fonts/Bona_Nova_SC/BonaNovaSC-Italic.ttf" id="5_x5u83"]
 [ext_resource type="FontFile" uid="uid://dcf1hls2gfcfc" path="res://assets/fonts/Bona_Nova_SC/BonaNovaSC-Regular.ttf" id="6_m0kks"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_fx2jk"]
+texture = ExtResource("2_dstrx")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1j4mq"]
+texture = ExtResource("2_vlwff")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_lrpwi"]
+texture = ExtResource("1_hanp0")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_a20gn"]
 texture = ExtResource("1_hanp0")
@@ -15,8 +38,13 @@ texture_margin_right = 9.0
 texture_margin_bottom = 9.0
 
 [resource]
+Button/styles/disabled = SubResource("StyleBoxTexture_fx2jk")
+Button/styles/focus = SubResource("StyleBoxTexture_fx2jk")
+Button/styles/hover = SubResource("StyleBoxTexture_1j4mq")
+Button/styles/hover_pressed = SubResource("StyleBoxTexture_lrpwi")
+Button/styles/normal = SubResource("StyleBoxTexture_fx2jk")
 PanelContainer/styles/panel = SubResource("StyleBoxTexture_a20gn")
-RichTextLabel/font_sizes/normal_font_size = 24
+RichTextLabel/font_sizes/normal_font_size = 36
 RichTextLabel/fonts/bold_font = ExtResource("2_hmq0m")
 RichTextLabel/fonts/mono_font = ExtResource("3_swvbi")
 RichTextLabel/fonts/normal_font = ExtResource("3_swvbi")
