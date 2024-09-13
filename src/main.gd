@@ -25,8 +25,10 @@ func create_grid():
 			cell.cell_revealed.connect(_on_cell_revealed)
 
 func _on_cell_revealed(cell: Cell):
-	if cell.number > 0 or cell.is_mine:
+	if cell.number > 0 or cell.is_mine or cell.flagged:
 		return
+
+	await get_tree().create_timer(0.1).timeout
 
 	for dx in [-1, 0, 1]:
 		for dy in [-1, 0, 1]:

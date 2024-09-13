@@ -2,9 +2,13 @@
 
 game on itch.io: [link](https://thewarlock.itch.io/mine-sweeter)
 
+This game is a submission to this jam: https://itch.io/jam/clone-jam-game-a-month
 
+It's a clone of the game "Minesweeper" with a few twists:
 
 ## TODO
+
+
 
 - Push release with `./push_release.sh`
 

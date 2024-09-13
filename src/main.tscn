@@ -3,6 +3,7 @@
 [ext_resource type="Script" path="res://main.gd" id="1_30g2o"]
 
 [node name="Main" type="Node2D"]
+position = Vector2(149, 82)
 script = ExtResource("1_30g2o")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
