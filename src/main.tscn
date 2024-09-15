@@ -1,9 +1,33 @@
-[gd_scene load_steps=2 format=3 uid="uid://cgrejd4v5ywd3"]
+[gd_scene load_steps=5 format=3 uid="uid://cgrejd4v5ywd3"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_30g2o"]
+[ext_resource type="Script" path="res://camera.gd" id="2_gi7hc"]
+[ext_resource type="PackedScene" uid="uid://cx0f7aqu2rweo" path="res://deck.tscn" id="2_skvlw"]
+[ext_resource type="PackedScene" uid="uid://l0fykk82x6xx" path="res://map.tscn" id="3_sidb8"]
 
 [node name="Main" type="Node2D"]
-position = Vector2(149, 82)
 script = ExtResource("1_30g2o")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="Deck" parent="CanvasLayer" instance=ExtResource("2_skvlw")]
+unique_name_in_owner = true
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -124.0
+offset_top = -166.0
+offset_right = 0.0
+offset_bottom = 0.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("map")]
+unique_name_in_owner = true
+script = ExtResource("2_gi7hc")
+map = NodePath("../Map")
+
+[node name="Map" parent="." instance=ExtResource("3_sidb8")]
+unique_name_in_owner = true

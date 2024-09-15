@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3 uid="uid://xre67uirv4dq"]
+
+[ext_resource type="Script" path="res://card.gd" id="1_pgbsw"]
+
+[node name="Card" type="Node2D"]
+script = ExtResource("1_pgbsw")
+
+[node name="PanelContainer" type="PanelContainer" parent="."]
+offset_right = 114.0
+offset_bottom = 152.0
+
+[node name="MarginContainer" type="MarginContainer" parent="PanelContainer"]
+layout_mode = 2
+
+[node name="CenterContainer" type="CenterContainer" parent="PanelContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Value" type="RichTextLabel" parent="PanelContainer/MarginContainer/CenterContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+text = "[center]+5"
+fit_content = true
+autowrap_mode = 0
