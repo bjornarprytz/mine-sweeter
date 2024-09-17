@@ -8,12 +8,15 @@ var number: int = 0
 var revealed: bool = false
 var flagged: bool = false
 
+var confirmed_safe: bool = false
+
 var map: Map
 
 var coordinates: Vector2 = Vector2.ZERO
 
 @onready var button: Button = $Button
 @onready var tag: RichTextLabel = %Tag
+@onready var check: Sprite2D = %Check
 
 func reveal():
 	if revealed or flagged:
@@ -40,14 +43,14 @@ func reveal():
 			number += 1
 
 	if is_mine:
-		modulate = Color(1, 0.5, 0.5) # Light red for mines
+		button.modulate = Color(1, 0.5, 0.5) # Light red for mines
 	elif number > 0:
 		var hue = (number - 1) / 8.0 + 0.6 # Shift the color wheel so 1 is blue
 		var saturation = 0.7 # Moderate saturation for visibility
 		var value = 0.9 # High value for brightness
-		modulate = Color.from_hsv(fmod(hue, 1.0), saturation, value)
+		button.modulate = Color.from_hsv(fmod(hue, 1.0), saturation, value)
 	else:
-		modulate = Color(0.7, 0.7, 0.7) # Darkened color for empty cells (0)
+		button.modulate = Color(0.7, 0.7, 0.7) # Darkened color for empty cells (0)
 
 	tag.show()
 	if is_mine:
@@ -59,6 +62,15 @@ func reveal():
 		Events.mine_tripped.emit(self)
 
 func declare_scored():
+	var flagged_neighbors: Array[Cell] = []
+	var neighbors = map.get_neighbors(self)
+	for neighbor in neighbors:
+		if neighbor.flagged:
+			flagged_neighbors.append(neighbor)
+	Events.mines_confirmed.emit(flagged_neighbors)
+
+
+func try_confirm_safe():
 	var neighbors = map.get_neighbors(self)
 	var safe_neighbors: Array[Cell] = []
 	var flagged_neighbors: Array[Cell] = []
@@ -71,7 +83,13 @@ func declare_scored():
 	if flagged_neighbors.size() == number:
 		for neighbor in safe_neighbors:
 			neighbor.reveal()
-		Events.mines_confirmed.emit(flagged_neighbors)
+		confirmed_safe = true
+		check.show()
+		var tween = create_tween()
+		var target_scale = check.scale
+		check.scale = Vector2.ZERO
+		tween.tween_property(check, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+		await tween.finished
 
 func toggle_flag():
 	tag.show()
@@ -89,13 +107,13 @@ func denied():
 	const shake_duration: float = 0.01
 	var tween = create_tween()
 	
-	var original_color = modulate
-	modulate = Color(.8, .2, .2) # A more intense red color
+	var original_color = button.modulate
+	button.modulate = Color(.8, .2, .2) # A more intense red color
 	
 	for i in range(n_shakes):
 		tween.tween_property(self, "position", position + Vector2(randf_range(-shake_amount, shake_amount), randf_range(-shake_amount, shake_amount)), shake_duration)
 		tween.tween_property(self, "position", position, shake_duration)
-	tween.tween_property(self, "modulate", original_color, .1)
+	tween.tween_property(button, "modulate", original_color, .1)
 	await tween.finished
 
 func _on_button_gui_input(event: InputEvent) -> void:
@@ -103,8 +121,10 @@ func _on_button_gui_input(event: InputEvent) -> void:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			if flagged:
 				denied()
-			elif revealed:
+			elif confirmed_safe:
 				declare_scored()
+			elif revealed:
+				try_confirm_safe()
 			else:
 				reveal()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:

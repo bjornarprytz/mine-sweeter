@@ -17,6 +17,7 @@ It's a clone of the game "Minesweeper" with a few twists:
 
 - Mines
   - Value mines (4, 5, or 6)
+    - Update hard-coded mine values in main.gd
 
 - Tripping a mine
   - Either
