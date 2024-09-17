@@ -1,12 +1,15 @@
 extends Node2D
 
 @onready var score_label: RichTextLabel = %ScoreLabel
+@onready var exp_label: RichTextLabel = %ExpLabel
 
 @onready var map: Map = %Map
 @onready var camera: Camera2D = %Camera
 @onready var deck: Deck = %Deck
 
 var score: int = 0
+var next_level: int = 6
+var experience: int = next_level
 
 func _ready():
 	map.create_grid()
@@ -16,6 +19,17 @@ func _ready():
 	camera.position = map.get_center_cell().position
 
 func _on_cell_revealed(cell: Cell):
+
+	experience -= 1
+	exp_label.clear()
+	exp_label.append_text("[center]%s[/center]" % str(experience))
+
+	if experience <= 0:
+		next_level += 2
+		experience = next_level
+		deck.add_card(Card.Data.good())
+
+
 	if cell.number > 0 or cell.is_mine or cell.flagged:
 		return
 
@@ -34,7 +48,7 @@ func _on_mine_tripped(mine: Cell):
 		score_label.append_text("[center][color=purple]You lose![/color][/center]")
 
 func _on_mines_confirmed(mines: Array[Cell]):
-	var mine_value: int = 2 # TODO: Change this
+	var mine_value: int = 1 # TODO: Change this
 
 	var cards = deck.pop_cards(mine_value * mines.size())
 
@@ -69,3 +83,6 @@ func _on_mines_confirmed(mines: Array[Cell]):
 
 	score_label.clear()
 	score_label.append_text("[center][color=green]%s[/color][/center]" % str(score))
+
+	for card in cards:
+		deck.add_card(card)

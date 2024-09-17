@@ -1,6 +1,9 @@
 class_name Card
 extends Node2D
 
+const bad_card_type_probability_distribution: Array[float] = [0.9, 0.1]
+const good_card_type_probability_distribution: Array[float] = [0.75, 0.25]
+const card_type_values: Array[Type] = [Type.VALUE, Type.MULTIPLIER]
 
 const good_card_values: Array[int] = [1, 2, 3, 4]
 const good_card_values_probability_distribution: Array[float] = [0.50, 0.30, 0.15, 0.05]
@@ -22,7 +25,9 @@ class Data:
 		self.type = _type
 		self.value = _value
 	
-	static func bad(_type: Type) -> Card.Data:
+	static func bad() -> Card.Data:
+		var type_index = Utils.get_index_from_probability_distribution(bad_card_type_probability_distribution)
+		var _type = card_type_values[type_index]
 		match _type:
 			Type.VALUE:
 				var index = Utils.get_index_from_probability_distribution(bad_card_values_probability_distribution)
@@ -33,7 +38,9 @@ class Data:
 			_:
 				return null
 
-	static func good(_type: Type) -> Card.Data:
+	static func good() -> Card.Data:
+		var type_index = Utils.get_index_from_probability_distribution(good_card_type_probability_distribution)
+		var _type = card_type_values[type_index]
 		match _type:
 			Type.VALUE:
 				var index = Utils.get_index_from_probability_distribution(good_card_values_probability_distribution)

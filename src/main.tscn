@@ -1,9 +1,8 @@
-[gd_scene load_steps=6 format=3 uid="uid://cgrejd4v5ywd3"]
+[gd_scene load_steps=5 format=3 uid="uid://cgrejd4v5ywd3"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_30g2o"]
 [ext_resource type="Script" path="res://camera.gd" id="2_gi7hc"]
 [ext_resource type="PackedScene" uid="uid://cx0f7aqu2rweo" path="res://deck.tscn" id="2_skvlw"]
-[ext_resource type="PackedScene" uid="uid://conm6h6e06j0j" path="res://add_card_mechanism.tscn" id="3_472wm"]
 [ext_resource type="PackedScene" uid="uid://l0fykk82x6xx" path="res://map.tscn" id="3_sidb8"]
 
 [node name="Main" type="Node2D"]
@@ -25,10 +24,7 @@ offset_bottom = 0.0
 grow_horizontal = 0
 grow_vertical = 0
 
-[node name="AddCardMechanism" parent="CanvasLayer" node_paths=PackedStringArray("deck") instance=ExtResource("3_472wm")]
-deck = NodePath("../Deck")
-
-[node name="PanelContainer" type="PanelContainer" parent="CanvasLayer"]
+[node name="ScoreContainer" type="PanelContainer" parent="CanvasLayer"]
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
@@ -36,7 +32,15 @@ offset_left = -205.0
 offset_bottom = 75.0
 grow_horizontal = 0
 
-[node name="ScoreLabel" type="RichTextLabel" parent="CanvasLayer/PanelContainer"]
+[node name="ScoreLabel" type="RichTextLabel" parent="CanvasLayer/ScoreContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="ExpContainer" type="PanelContainer" parent="CanvasLayer"]
+offset_right = 107.0
+offset_bottom = 101.0
+
+[node name="ExpLabel" type="RichTextLabel" parent="CanvasLayer/ExpContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 
