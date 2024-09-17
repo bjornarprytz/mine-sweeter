@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://conm6h6e06j0j"]
+
+[ext_resource type="Script" path="res://add_card_mechanism.gd" id="1_lejbt"]
+
+[node name="AddCardMechanism" type="PanelContainer"]
+offset_right = 87.0
+offset_bottom = 87.0
+script = ExtResource("1_lejbt")
+
+[node name="Label" type="RichTextLabel" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+bbcode_enabled = true
+text = "[center]"

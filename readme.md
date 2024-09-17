@@ -13,15 +13,7 @@ It's a clone of the game "Minesweeper" with a few twists:
 ## TODO
 
 - Initialization
-  - Add cards to the board
   - Tutorialize the open of a cell
-
-- Gameplay loop
-  - OnOpenCell
-    - If the revealed cell is adjacent to a mine
-      - Add 1 card to the deck
-    - If the revealed cell is a mine, trip it
-    - If any mines are isolated, score them
 
 - Mines
   - Value mines (4, 5, or 6)
@@ -32,19 +24,13 @@ It's a clone of the game "Minesweeper" with a few twists:
     - Add X bad cards
 
 - Scoring mines
-  - Draw X cards, where X is the cumulative value of the scored mines
-    - Add value cards
-    - Multiply score by multiplier cards
-    - Discard the scored cards
-
-- Deck
-  - Add Cards (to the bottom)
-  - Draw Cards (from the top)
-  - Mill Cards (from the top)
-  - Shuffle Cards
+  - Discard the scored cards?
+  - Make the mine unable to be scored again
 
 - QoL
-  - Auto-flag cells where it's obvious (sum unrevealed adjacent cells, if the sum is the value of the cell, then all unrevealed cells are mines)
+  - Check mark cells that are completely flagged/mined
+  - Grey out cells that are safe, and mines that are flagged and confirmed
+  - Option: Auto-flag cells where it's obvious (sum unrevealed adjacent cells, if the sum is the value of the cell, then all unrevealed cells are mines)
 
 - Push release with `./push_release.sh`
 

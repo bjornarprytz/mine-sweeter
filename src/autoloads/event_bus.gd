@@ -8,3 +8,6 @@ signal tutorial_reveal_first_cell()
 
 signal cell_revealed(cell: Cell)
 signal cell_flagged(cell: Cell, flagged: bool)
+
+signal mine_tripped(cell: Cell)
+signal mines_confirmed(cells: Array[Cell])

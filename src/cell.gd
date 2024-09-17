@@ -16,10 +16,8 @@ var coordinates: Vector2 = Vector2.ZERO
 @onready var tag: RichTextLabel = %Tag
 
 func reveal():
-	if revealed:
+	if revealed or flagged:
 		return
-	if flagged:
-		toggle_flag()
 	
 	if !Game.first_cell_revealed:
 		Game.first_cell_revealed = true
@@ -57,6 +55,23 @@ func reveal():
 	elif number > 0:
 		tag.append_text("[center][color=blue]%s[/color][/center]" % str(number))
 	Events.cell_revealed.emit(self)
+	if is_mine:
+		Events.mine_tripped.emit(self)
+
+func declare_scored():
+	var neighbors = map.get_neighbors(self)
+	var safe_neighbors: Array[Cell] = []
+	var flagged_neighbors: Array[Cell] = []
+	for neighbor in neighbors:
+		if neighbor.flagged:
+			flagged_neighbors.append(neighbor)
+		elif !neighbor.revealed:
+			safe_neighbors.append(neighbor)
+	
+	if flagged_neighbors.size() == number:
+		for neighbor in safe_neighbors:
+			neighbor.reveal()
+		Events.mines_confirmed.emit(flagged_neighbors)
 
 func toggle_flag():
 	tag.show()
@@ -68,21 +83,29 @@ func toggle_flag():
 			tag.clear()
 		Events.cell_flagged.emit(self, flagged)
 
+func denied():
+	const n_shakes: int = 10
+	const shake_amount: int = 5
+	const shake_duration: float = 0.01
+	var tween = create_tween()
+	
+	var original_color = modulate
+	modulate = Color(.8, .2, .2) # A more intense red color
+	
+	for i in range(n_shakes):
+		tween.tween_property(self, "position", position + Vector2(randf_range(-shake_amount, shake_amount), randf_range(-shake_amount, shake_amount)), shake_duration)
+		tween.tween_property(self, "position", position, shake_duration)
+	tween.tween_property(self, "modulate", original_color, .1)
+	await tween.finished
+
 func _on_button_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and !event.is_pressed():
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			if revealed:
-				var neighbors = map.get_neighbors(self)
-				var safe_neighbors: Array[Cell] = []
-				var n_flagged_neighbors = 0
-				for neighbor in neighbors:
-					if neighbor.flagged:
-						n_flagged_neighbors += 1
-					elif !neighbor.revealed:
-						safe_neighbors.append(neighbor)
-				if n_flagged_neighbors == number:
-					for neighbor in safe_neighbors:
-						neighbor.reveal()
-			reveal()
+			if flagged:
+				denied()
+			elif revealed:
+				declare_scored()
+			else:
+				reveal()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			toggle_flag()
