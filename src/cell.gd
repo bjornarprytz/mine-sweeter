@@ -9,9 +9,13 @@ enum Type {
 }
 
 enum State {
+	## The cell is closed
 	HIDDEN,
+	## The cell is open
 	REVEALED,
+	## The player has flagged this cell as a mine
 	FLAGGED,
+	## It and all surrounding mines are scored
 	SCORED
 }
 
@@ -88,6 +92,7 @@ var coordinates: Vector2 = Vector2.ZERO
 @onready var button: Button = $Button
 @onready var tag: RichTextLabel = %Tag
 @onready var check: Sprite2D = %Check
+@onready var solve: Sprite2D = %Solve
 
 func _ready() -> void:
 	Events.cell_flagged.connect(_on_cell_flagged_changed)
@@ -196,8 +201,14 @@ func _update_hint():
 
 func _set_ready_to_solve(yes: bool):
 	if !yes:
+		solve.hide()
 		return
-	print("TODO: Implement ready to score visual")
+	solve.show()
+	var tween = create_tween()
+	var target_scale = solve.scale
+	solve.scale = Vector2.ZERO
+	tween.tween_property(solve, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	await tween.finished
 	
 func _set_ready_to_score(yes: bool):
 	if !yes:
@@ -253,11 +264,11 @@ func _on_button_gui_input(event: InputEvent) -> void:
 					denied()
 				State.REVEALED:
 					match [is_mine, hint]:
-						false, Hint.SOLVABLE:
+						[false, Hint.SOLVABLE]:
 							_reveal_neighbors()
-						false, Hint.SCORABLE:
+						[false, Hint.SCORABLE]:
 							_declare_scored()
-						_, _:
+						_:
 							pass
 				State.SCORED:
 					pass
