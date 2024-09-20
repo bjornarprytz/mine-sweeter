@@ -30,7 +30,7 @@ func _on_cell_revealed(cell: Cell):
 		deck.add_card(Card.Data.good())
 
 
-	if cell.number > 0 or cell.is_mine or cell.flagged:
+	if cell.number > 0 or cell.is_mine or cell.is_flagged:
 		return
 
 	await get_tree().create_timer(0.1).timeout

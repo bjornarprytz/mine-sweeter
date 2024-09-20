@@ -15,6 +15,16 @@ It's a clone of the game "Minesweeper" with a few twists:
 - Initialization
   - Tutorialize the open of a cell
 
+- Refactor the cell to a state machine, because it's already getting out of hand
+
+- Scoring
+  - When you click on a cell with confirmed neighbors, you draw 1 card per mine, and score the draw
+  - Then grey them out so they can't be used again
+  - The number on adjacent cells is updated to reflect the number of mines that have been scored
+
+
+- Check when a 
+
 - Mines
   - Value mines (4, 5, or 6)
     - Update hard-coded mine values in main.gd

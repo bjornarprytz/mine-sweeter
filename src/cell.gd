@@ -3,13 +3,84 @@ extends Node2D
 
 const size: int = 64
 
-var is_mine: bool = false
+enum Type {
+	EMPTY,
+	MINE,
+}
+
+enum State {
+	HIDDEN,
+	REVEALED,
+	FLAGGED,
+	SCORED
+}
+
+enum Hint {
+	NONE,
+	## All neighbour mines are flagged, presumably
+	SOLVABLE,
+	## All neighbour mines have been identified, and can be scored
+	SCORABLE
+}
+
+var is_flagged: bool:
+	get:
+		return state == State.FLAGGED
+	set(value):
+		state = State.FLAGGED if value else State.HIDDEN
+
+var is_revealed: bool:
+	get:
+		return state == State.REVEALED
+	set(value):
+		state = State.REVEALED if value else State.HIDDEN
+
+var is_scored: bool:
+	get:
+		return state == State.SCORED
+	set(value):
+		state = State.SCORED if value else State.REVEALED
+
+var is_hidden: bool:
+	get:
+		return state == State.HIDDEN
+	set(value):
+		state = State.HIDDEN if value else State.REVEALED
+
+var is_mine: bool:
+	get:
+		return type == Type.MINE
+	set(value):
+		type = Type.MINE if value else Type.EMPTY
+
+var is_scorable: bool:
+	get:
+		return hint == Hint.SCORABLE
+
+var is_solved: bool:
+	get:
+		return hint == Hint.SOLVABLE
+
+var type: Type = Type.EMPTY
+var state: State = State.HIDDEN
+var hint: Hint = Hint.NONE:
+	set(value):
+		if value == hint:
+			return
+		
+		hint = value
+		_set_ready_to_score(false)
+		_set_ready_to_solve(false)
+
+		match hint:
+			Hint.NONE:
+				pass
+			Hint.SCORABLE:
+				_set_ready_to_score(true)
+			Hint.SOLVABLE:
+				_set_ready_to_solve(true)
+
 var number: int = 0
-var revealed: bool = false
-var flagged: bool = false
-
-var confirmed_safe: bool = false
-
 var map: Map
 
 var coordinates: Vector2 = Vector2.ZERO
@@ -18,17 +89,30 @@ var coordinates: Vector2 = Vector2.ZERO
 @onready var tag: RichTextLabel = %Tag
 @onready var check: Sprite2D = %Check
 
-func reveal():
-	if revealed or flagged:
+func _ready() -> void:
+	Events.cell_flagged.connect(_on_cell_flagged_changed)
+	Events.cell_unflagged.connect(_on_cell_flagged_changed)
+
+func _on_cell_flagged_changed(cell: Cell) -> void:
+	if !_is_neighbour(cell):
+		return
+	_update_hint()
+
+
+func reveal(force: bool = false):
+	if is_revealed:
+		return
+	
+	if is_flagged and !force:
 		return
 	
 	if !Game.first_cell_revealed:
 		Game.first_cell_revealed = true
 		Events.tutorial_reveal_first_cell.emit()
-		if is_mine:
-			is_mine = false
+		if type == Type.MINE:
+			type = Type.EMPTY
 
-	revealed = true
+	state = State.REVEALED
 
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector2(1.2, 1.2), 0.05)
@@ -39,67 +123,112 @@ func reveal():
 	var neighbors = map.get_neighbors(self)
 	number = 0
 	for neighbor in neighbors:
-		if neighbor.is_mine:
+		if neighbor.type == Type.MINE:
 			number += 1
 
-	if is_mine:
-		button.modulate = Color(1, 0.5, 0.5) # Light red for mines
-	elif number > 0:
-		var hue = (number - 1) / 8.0 + 0.6 # Shift the color wheel so 1 is blue
-		var saturation = 0.7 # Moderate saturation for visibility
-		var value = 0.9 # High value for brightness
-		button.modulate = Color.from_hsv(fmod(hue, 1.0), saturation, value)
-	else:
-		button.modulate = Color(0.7, 0.7, 0.7) # Darkened color for empty cells (0)
-
 	tag.show()
-	if is_mine:
-		tag.append_text("[center][color=red]X[/color][/center]")
-	elif number > 0:
-		tag.append_text("[center][color=blue]%s[/color][/center]" % str(number))
+	match type:
+		Type.MINE:
+			button.modulate = Color(1, 0.5, 0.5) # Light red for mines
+			tag.append_text("[center][color=red]X[/color][/center]")
+		Type.EMPTY:
+			if number > 0:
+				var hue = (number - 1) / 8.0 + 0.6 # Shift the color wheel so 1 is blue
+				var saturation = 0.7 # Moderate saturation for visibility
+				var value = 0.9 # High value for brightness
+				button.modulate = Color.from_hsv(fmod(hue, 1.0), saturation, value)
+				tag.append_text("[center][color=blue]%s[/color][/center]" % str(number))
+			else:
+				button.modulate = Color(0.7, 0.7, 0.7) # Darkened color for empty cells (0)
+
+	_update_hint()
+
 	Events.cell_revealed.emit(self)
-	if is_mine:
+	if type == Type.MINE:
 		Events.mine_tripped.emit(self)
 
-func declare_scored():
-	var flagged_neighbors: Array[Cell] = []
+func _declare_scored():
+	var correct_flags: Array[Cell] = []
+	var errors: Array[Cell] = []
 	var neighbors = map.get_neighbors(self)
 	for neighbor in neighbors:
-		if neighbor.flagged:
-			flagged_neighbors.append(neighbor)
-	Events.mines_confirmed.emit(flagged_neighbors)
+		if !neighbor.is_flagged:
+			continue
 
-
-func try_confirm_safe():
-	var neighbors = map.get_neighbors(self)
-	var safe_neighbors: Array[Cell] = []
-	var flagged_neighbors: Array[Cell] = []
-	for neighbor in neighbors:
-		if neighbor.flagged:
-			flagged_neighbors.append(neighbor)
-		elif !neighbor.revealed:
-			safe_neighbors.append(neighbor)
+		if neighbor.is_mine:
+			correct_flags.append(neighbor)
+		else:
+			errors.append(neighbor)
 	
-	if flagged_neighbors.size() == number:
-		for neighbor in safe_neighbors:
+	if errors.is_empty():
+		Events.mines_confirmed.emit(correct_flags)
+		for neighbor in correct_flags:
+			neighbor.is_scored = true
+	else:
+		for cell in errors:
+			cell.is_flagged = false
+			cell.reveal()
+
+func _update_hint():
+	if is_hidden or number == 0 or is_mine:
+		return
+	
+	var neighbors = map.get_neighbors(self)
+	var n_neigbour_flags = 0
+	var n_neigbour_mines = 0
+	var n_neigbour_hidden = 0
+	for neighbor in neighbors:
+		if neighbor.is_flagged:
+			n_neigbour_flags += 1
+		elif neighbor.is_revealed and neighbor.is_mine:
+			n_neigbour_mines += 1
+		elif neighbor.is_hidden:
+			n_neigbour_hidden += 1
+	
+	var mines_match_number = (n_neigbour_flags + n_neigbour_mines == number)
+
+	if n_neigbour_hidden == 0 and (n_neigbour_flags > 0) and mines_match_number:
+		hint = Hint.SCORABLE
+	elif n_neigbour_hidden > 0 and mines_match_number:
+		hint = Hint.SOLVABLE
+	else:
+		hint = Hint.NONE
+
+func _set_ready_to_solve(yes: bool):
+	if !yes:
+		return
+	print("TODO: Implement ready to score visual")
+	
+func _set_ready_to_score(yes: bool):
+	if !yes:
+		check.hide()
+		return
+	check.show()
+	var tween = create_tween()
+	var target_scale = check.scale
+	check.scale = Vector2.ZERO
+	tween.tween_property(check, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	await tween.finished
+
+func _reveal_neighbors():
+	var neighbors = map.get_neighbors(self)
+	for neighbor in neighbors:
+		if !neighbor.is_flagged:
 			neighbor.reveal()
-		confirmed_safe = true
-		check.show()
-		var tween = create_tween()
-		var target_scale = check.scale
-		check.scale = Vector2.ZERO
-		tween.tween_property(check, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-		await tween.finished
 
 func toggle_flag():
 	tag.show()
-	if not revealed:
-		flagged = !flagged
-		if flagged:
+	match state:
+		State.HIDDEN:
+			state = State.FLAGGED
 			tag.append_text("[center][color=darkgreen]F[/color][/center]")
-		else:
+			Events.cell_flagged.emit(self)
+		State.FLAGGED:
+			state = State.HIDDEN
 			tag.clear()
-		Events.cell_flagged.emit(self, flagged)
+			Events.cell_unflagged.emit(self)
+		_:
+			pass
 
 func denied():
 	const n_shakes: int = 10
@@ -119,13 +248,28 @@ func denied():
 func _on_button_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and !event.is_pressed():
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			if flagged:
-				denied()
-			elif confirmed_safe:
-				declare_scored()
-			elif revealed:
-				try_confirm_safe()
-			else:
-				reveal()
+			match state:
+				State.FLAGGED:
+					denied()
+				State.REVEALED:
+					match [is_mine, hint]:
+						false, Hint.SOLVABLE:
+							_reveal_neighbors()
+						false, Hint.SCORABLE:
+							_declare_scored()
+						_, _:
+							pass
+				State.SCORED:
+					pass
+				State.HIDDEN:
+					reveal()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			toggle_flag()
+
+func _is_neighbour(other: Cell) -> bool:
+	# Check if the other cell is a neighbor
+	var dx = abs(self.coordinates.x - other.coordinates.x)
+	var dy = abs(self.coordinates.y - other.coordinates.y)
+	
+	# A cell is a neighbor if it's adjacent horizontally, vertically, or diagonally. dy and dx can't both be 0
+	return dx <= 1 and dy <= 1 and (dx != 0 or dy != 0)
