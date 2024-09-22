@@ -72,6 +72,7 @@ offset_top = -24.0
 offset_right = 608.0
 offset_bottom = 206.0
 scale = Vector2(0.08, 0.08)
+mouse_filter = 2
 theme_override_font_sizes/normal_font_size = 128
 bbcode_enabled = true
 text = "(11,23)"

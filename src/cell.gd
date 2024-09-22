@@ -217,19 +217,21 @@ func _update_hint():
 	var n_scored_neighbour_flags = 0
 	var n_neigbour_mines = 0
 	var n_neigbour_hidden = 0
-	for neighbor in neighbors:
-		if neighbor.is_flagged:
-			if !neighbor.is_scored:
-				n_unscored_neigbour_flags += 1
-			else:
+	for n in neighbors:
+		match [n.state, n.hint, n.type]:
+			[State.FLAGGED, Hint.SCORED, _]:
 				n_scored_neighbour_flags += 1
-		elif neighbor.is_revealed and neighbor.is_mine:
-			n_neigbour_mines += 1
-		elif neighbor.is_hidden:
-			n_neigbour_hidden += 1
+			[State.FLAGGED, _, _]:
+				n_unscored_neigbour_flags += 1
+			[State.REVEALED, _, Type.MINE]:
+				n_neigbour_mines += 1
+			[State.HIDDEN, _, _]:
+				n_neigbour_hidden += 1
 	
 	var mines_match_number = (n_unscored_neigbour_flags + n_neigbour_mines + n_scored_neighbour_flags == number)
-	var has_unscored_flags = (n_unscored_neigbour_flags - n_scored_neighbour_flags > 0)
+	var has_unscored_flags = (n_unscored_neigbour_flags > 0)
+
+	var prev_hint = hint
 
 	if n_neigbour_hidden == 0 and has_unscored_flags and mines_match_number:
 		hint = Hint.SCORABLE
@@ -237,6 +239,9 @@ func _update_hint():
 		hint = Hint.SOLVABLE
 	else:
 		hint = Hint.NONE
+	
+	if prev_hint != hint:
+		print("Updating hint for %s -> %s, [s:%s, u:%s, m:%s, h:%s]" % [coordinates, str(Hint.keys()[hint]), n_scored_neighbour_flags, n_unscored_neigbour_flags, n_neigbour_mines, n_neigbour_hidden])
 
 func _set_ready_to_solve(yes: bool):
 	if !yes:
@@ -311,6 +316,7 @@ func _on_button_gui_input(event: InputEvent) -> void:
 		if is_scored:
 			return
 		if event.button_index == MOUSE_BUTTON_LEFT:
+			print("-click- %s" % coordinates)
 			match state:
 				State.FLAGGED:
 					_denied()
