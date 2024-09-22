@@ -6,8 +6,17 @@ extends Node2D
 @onready var map: Map = %Map
 @onready var camera: Camera2D = %Camera
 @onready var deck: Deck = %Deck
+@onready var card_scoring: CardScoring = %CardScoring
 
-var score: int = 0
+var score: float = 0.0:
+	set(value):
+		if score == value:
+			return
+		score = value
+
+		score_label.clear()
+		score_label.append_text("[center]%s[/center]" % str(int(score)))
+
 var next_level: int = 6
 var experience: int = next_level
 
@@ -38,7 +47,7 @@ func _on_cell_revealed(cell: Cell):
 	for neighbor in map.get_neighbors(cell):
 		neighbor.reveal()
 
-func _on_mine_tripped(mine: Cell):
+func _on_mine_tripped(_mine: Cell):
 	var mine_value: int = 2 # TODO: Change this
 
 	var cards = deck.pop_cards(mine_value)
@@ -48,41 +57,16 @@ func _on_mine_tripped(mine: Cell):
 		score_label.append_text("[center][color=purple]You lose![/color][/center]")
 
 func _on_mines_confirmed(mines: Array[Cell]):
+	if mines.size() == 0:
+		return
+
+	card_scoring.show()
+
 	var mine_value: int = 1 # TODO: Change this
 
-	var cards = deck.pop_cards(mine_value * mines.size())
+	var result = await card_scoring.score_cards(deck.pop_cards(mine_value * mines.size()))
 
-	var value_cards: Array[Card.Data] = []
-	var multiplier_cards: Array[Card.Data] = []
-	var multipliers: Array[int] = []
-
-	for card in cards:
-		if card.type == Card.Type.VALUE:
-			value_cards.append(card)
-		elif card.type == Card.Type.MULTIPLIER:
-			multiplier_cards.append(card)
-
-	var score_multiplier: int = 1
-
-	for card in multiplier_cards:
-		score_multiplier *= card.value
-		multipliers.append(card.value)
-
-	var score_value: int = 0
-	var values = []
-
-	for card in value_cards:
-		score_value += card.value
-		values.append(card.value)
-
-	score += score_value * score_multiplier
-
-	print("Scoring cards:")
-	print(values)
-	print(multipliers)
-
-	score_label.clear()
-	score_label.append_text("[center][color=green]%s[/color][/center]" % str(score))
-
-	for card in cards:
-		deck.add_card(card)
+	card_scoring.hide()
+	
+	var tween = create_tween()
+	tween.tween_property(self, "score", score + result, 1.0)

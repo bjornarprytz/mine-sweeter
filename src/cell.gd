@@ -14,9 +14,7 @@ enum State {
 	## The cell is open
 	REVEALED,
 	## The player has flagged this cell as a mine
-	FLAGGED,
-	## It and all surrounding mines are scored
-	SCORED
+	FLAGGED
 }
 
 enum Hint {
@@ -40,10 +38,14 @@ var is_revealed: bool:
 		state = State.REVEALED if value else State.HIDDEN
 
 var is_scored: bool:
-	get:
-		return state == State.SCORED
 	set(value):
-		state = State.SCORED if value else State.REVEALED
+		if value == is_scored:
+			return
+		
+		is_scored = value
+
+		if is_scored:
+			Events.cell_scored.emit(self)
 
 var is_hidden: bool:
 	get:
@@ -66,7 +68,26 @@ var is_solved: bool:
 		return hint == Hint.SOLVABLE
 
 var type: Type = Type.EMPTY
-var state: State = State.HIDDEN
+var state: State = State.HIDDEN:
+	set(value):
+		if state == value:
+			return
+		var prev_state = state
+		state = value
+
+		match [prev_state, state]:
+			[State.HIDDEN, State.FLAGGED]:
+				Events.cell_flagged.emit(self)
+			[State.FLAGGED, State.HIDDEN]:
+				Events.cell_unflagged.emit(self)
+			[_, State.REVEALED]:
+				Events.cell_revealed.emit(self)
+				if is_mine:
+					Events.mine_tripped.emit(self)
+			_:
+				pass
+
+
 var hint: Hint = Hint.NONE:
 	set(value):
 		if value == hint:
@@ -97,27 +118,30 @@ var coordinates: Vector2 = Vector2.ZERO
 func _ready() -> void:
 	Events.cell_flagged.connect(_on_cell_flagged_changed)
 	Events.cell_unflagged.connect(_on_cell_flagged_changed)
+	Events.cell_scored.connect(_on_cell_scored)
+
+func _on_cell_scored(cell: Cell) -> void:
+	if !_is_neighbour(cell):
+		return
+	_update_hint()
 
 func _on_cell_flagged_changed(cell: Cell) -> void:
 	if !_is_neighbour(cell):
 		return
 	_update_hint()
 
-
-func reveal(force: bool = false):
-	if is_revealed:
-		return
-	
-	if is_flagged and !force:
+func reveal():
+	if !is_hidden:
 		return
 	
 	if !Game.first_cell_revealed:
 		Game.first_cell_revealed = true
 		Events.tutorial_reveal_first_cell.emit()
-		if type == Type.MINE:
-			type = Type.EMPTY
+		
+		type = Type.EMPTY
+		for n in map.get_neighbors(self):
+			n.type = Type.EMPTY
 
-	state = State.REVEALED
 
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector2(1.2, 1.2), 0.05)
@@ -132,6 +156,7 @@ func reveal(force: bool = false):
 			number += 1
 
 	tag.show()
+	tag.clear()
 	match type:
 		Type.MINE:
 			button.modulate = Color(1, 0.5, 0.5) # Light red for mines
@@ -146,11 +171,8 @@ func reveal(force: bool = false):
 			else:
 				button.modulate = Color(0.7, 0.7, 0.7) # Darkened color for empty cells (0)
 
+	state = State.REVEALED
 	_update_hint()
-
-	Events.cell_revealed.emit(self)
-	if type == Type.MINE:
-		Events.mine_tripped.emit(self)
 
 func _declare_scored():
 	var correct_flags: Array[Cell] = []
@@ -159,40 +181,50 @@ func _declare_scored():
 	for neighbor in neighbors:
 		if !neighbor.is_flagged:
 			continue
-
 		if neighbor.is_mine:
 			correct_flags.append(neighbor)
 		else:
 			errors.append(neighbor)
 	
 	if errors.is_empty():
-		Events.mines_confirmed.emit(correct_flags)
 		for neighbor in correct_flags:
 			neighbor.is_scored = true
+		_clear_hint()
+		is_scored = true
+		Events.mines_confirmed.emit(correct_flags)
 	else:
 		for cell in errors:
 			cell.is_flagged = false
-			cell.reveal()
+			await cell.reveal()
+	
+
+func _clear_hint():
+	hint = Hint.NONE
 
 func _update_hint():
 	if is_hidden or number == 0 or is_mine:
 		return
 	
 	var neighbors = map.get_neighbors(self)
-	var n_neigbour_flags = 0
+	var n_unscored_neigbour_flags = 0
+	var n_scored_neighbour_flags = 0
 	var n_neigbour_mines = 0
 	var n_neigbour_hidden = 0
 	for neighbor in neighbors:
 		if neighbor.is_flagged:
-			n_neigbour_flags += 1
+			if !neighbor.is_scored:
+				n_unscored_neigbour_flags += 1
+			else:
+				n_scored_neighbour_flags += 1
 		elif neighbor.is_revealed and neighbor.is_mine:
 			n_neigbour_mines += 1
 		elif neighbor.is_hidden:
 			n_neigbour_hidden += 1
 	
-	var mines_match_number = (n_neigbour_flags + n_neigbour_mines == number)
+	var mines_match_number = (n_unscored_neigbour_flags + n_neigbour_mines + n_scored_neighbour_flags == number)
+	var has_unscored_flags = (n_unscored_neigbour_flags - n_scored_neighbour_flags > 0)
 
-	if n_neigbour_hidden == 0 and (n_neigbour_flags > 0) and mines_match_number:
+	if n_neigbour_hidden == 0 and has_unscored_flags and mines_match_number:
 		hint = Hint.SCORABLE
 	elif n_neigbour_hidden > 0 and mines_match_number:
 		hint = Hint.SOLVABLE
@@ -225,19 +257,19 @@ func _reveal_neighbors():
 	var neighbors = map.get_neighbors(self)
 	for neighbor in neighbors:
 		if !neighbor.is_flagged:
-			neighbor.reveal()
+			await neighbor.reveal()
+	_update_hint()
 
 func toggle_flag():
 	tag.show()
 	match state:
 		State.HIDDEN:
-			state = State.FLAGGED
-			tag.append_text("[center][color=darkgreen]F[/color][/center]")
-			Events.cell_flagged.emit(self)
-		State.FLAGGED:
-			state = State.HIDDEN
 			tag.clear()
-			Events.cell_unflagged.emit(self)
+			tag.append_text("[center][color=darkgreen]F[/color][/center]")
+			state = State.FLAGGED
+		State.FLAGGED:
+			tag.clear()
+			state = State.HIDDEN
 		_:
 			pass
 
@@ -258,6 +290,8 @@ func denied():
 
 func _on_button_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and !event.is_pressed():
+		if is_scored:
+			return
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			match state:
 				State.FLAGGED:
@@ -270,8 +304,6 @@ func _on_button_gui_input(event: InputEvent) -> void:
 							_declare_scored()
 						_:
 							pass
-				State.SCORED:
-					pass
 				State.HIDDEN:
 					reveal()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:

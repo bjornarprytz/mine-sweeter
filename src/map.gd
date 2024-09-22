@@ -32,6 +32,8 @@ func get_neighbors(cell: Cell) -> Array[Cell]:
 	var neighbors: Array[Cell] = []
 	for dx in [-1, 0, 1]:
 		for dy in [-1, 0, 1]:
+			if dx == 0 and dy == 0:
+				continue
 			var nx = cell.coordinates.x + dx
 			var ny = cell.coordinates.y + dy
 			var neighbor = get_cell(nx, ny)

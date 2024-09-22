@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://cgrejd4v5ywd3"]
+[gd_scene load_steps=6 format=3 uid="uid://cgrejd4v5ywd3"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_30g2o"]
 [ext_resource type="Script" path="res://camera.gd" id="2_gi7hc"]
 [ext_resource type="PackedScene" uid="uid://cx0f7aqu2rweo" path="res://deck.tscn" id="2_skvlw"]
 [ext_resource type="PackedScene" uid="uid://l0fykk82x6xx" path="res://map.tscn" id="3_sidb8"]
+[ext_resource type="PackedScene" uid="uid://c078gtukoewfd" path="res://card_scoring.tscn" id="3_vv2er"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_30g2o")
@@ -43,6 +44,10 @@ offset_bottom = 101.0
 [node name="ExpLabel" type="RichTextLabel" parent="CanvasLayer/ExpContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="CardScoring" parent="CanvasLayer" instance=ExtResource("3_vv2er")]
+unique_name_in_owner = true
+visible = false
 
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("map")]
 unique_name_in_owner = true

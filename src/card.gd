@@ -1,5 +1,5 @@
 class_name Card
-extends Node2D
+extends Control
 
 const bad_card_type_probability_distribution: Array[float] = [0.9, 0.1]
 const good_card_type_probability_distribution: Array[float] = [0.75, 0.25]
@@ -57,14 +57,25 @@ enum Type {
 }
 
 var data: Data:
-	set(v):
-		data = v
-		match v.type:
-			Type.VALUE:
-				value_label.clear()
-				value_label.add_text("[centered]%s" % str(v.value))
-			Type.MULTIPLIER:
-				value_label.clear()
-				value_label.add_text("[centered]x%s" % str(v.value))
+	set(value):
+		data = value
+		if is_node_ready():
+			_update_label()
+		
 
 @onready var value_label: RichTextLabel = %Value
+
+
+func _ready() -> void:
+	_update_label()
+
+func _update_label():
+	value_label.clear()
+	if data == null:
+		return
+
+	match data.type:
+		Type.VALUE:
+			value_label.append_text("[center]%s" % str(data.value))
+		Type.MULTIPLIER:
+			value_label.append_text("[center]x%s" % str(data.value))

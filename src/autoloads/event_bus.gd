@@ -7,6 +7,7 @@ extends Node2D
 signal tutorial_reveal_first_cell()
 
 signal cell_revealed(cell: Cell)
+signal cell_scored(cell: Cell)
 signal cell_flagged(cell: Cell)
 signal cell_unflagged(cell: Cell)
 
