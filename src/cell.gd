@@ -22,7 +22,9 @@ enum Hint {
 	## All neighbour mines are flagged, presumably
 	SOLVABLE,
 	## All neighbour mines have been identified, and can be scored
-	SCORABLE
+	SCORABLE,
+	## All neigbour mines have been scored
+	SCORED
 }
 
 var is_flagged: bool:
@@ -38,14 +40,11 @@ var is_revealed: bool:
 		state = State.REVEALED if value else State.HIDDEN
 
 var is_scored: bool:
+	get:
+		return hint == Hint.SCORED
 	set(value):
-		if value == is_scored:
-			return
-		
-		is_scored = value
-
-		if is_scored:
-			Events.cell_scored.emit(self)
+		hint = Hint.SCORED if value else Hint.NONE
+			
 
 var is_hidden: bool:
 	get:
@@ -96,6 +95,7 @@ var hint: Hint = Hint.NONE:
 		hint = value
 		_set_ready_to_score(false)
 		_set_ready_to_solve(false)
+		_set_scored(false)
 
 		match hint:
 			Hint.NONE:
@@ -104,21 +104,33 @@ var hint: Hint = Hint.NONE:
 				_set_ready_to_score(true)
 			Hint.SOLVABLE:
 				_set_ready_to_solve(true)
+			Hint.SCORED:
+				_set_scored(true)
+				Events.cell_scored.emit(self)
 
 var number: int = 0
 var map: Map
 
-var coordinates: Vector2 = Vector2.ZERO
+var coordinates: Vector2 = Vector2.ZERO:
+	set(value):
+		coordinates = value
+		if is_node_ready():
+			coords_debug.text = str(coordinates)
 
 @onready var button: Button = $Button
 @onready var tag: RichTextLabel = %Tag
 @onready var check: Sprite2D = %Check
 @onready var solve: Sprite2D = %Solve
+@onready var scored: Sprite2D = %Scored
+@onready var coords_debug: RichTextLabel = $CoordsDebug
 
 func _ready() -> void:
 	Events.cell_flagged.connect(_on_cell_flagged_changed)
 	Events.cell_unflagged.connect(_on_cell_flagged_changed)
 	Events.cell_scored.connect(_on_cell_scored)
+	
+	coords_debug.text = str(coordinates)
+	
 
 func _on_cell_scored(cell: Cell) -> void:
 	if !_is_neighbour(cell):
@@ -189,20 +201,15 @@ func _declare_scored():
 	if errors.is_empty():
 		for neighbor in correct_flags:
 			neighbor.is_scored = true
-		_clear_hint()
 		is_scored = true
 		Events.mines_confirmed.emit(correct_flags)
 	else:
 		for cell in errors:
 			cell.is_flagged = false
 			await cell.reveal()
-	
-
-func _clear_hint():
-	hint = Hint.NONE
 
 func _update_hint():
-	if is_hidden or number == 0 or is_mine:
+	if is_scored or is_hidden or number == 0 or is_mine:
 		return
 	
 	var neighbors = map.get_neighbors(self)
@@ -253,6 +260,17 @@ func _set_ready_to_score(yes: bool):
 	tween.tween_property(check, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
 	await tween.finished
 
+func _set_scored(yes: bool):
+	if !yes:
+		scored.hide()
+		return
+	scored.show()
+	var tween = create_tween()
+	var target_scale = scored.scale
+	scored.scale = Vector2.ZERO
+	tween.tween_property(scored, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	await tween.finished
+
 func _reveal_neighbors():
 	var neighbors = map.get_neighbors(self)
 	for neighbor in neighbors:
@@ -260,7 +278,7 @@ func _reveal_neighbors():
 			await neighbor.reveal()
 	_update_hint()
 
-func toggle_flag():
+func _toggle_flag():
 	tag.show()
 	match state:
 		State.HIDDEN:
@@ -273,7 +291,7 @@ func toggle_flag():
 		_:
 			pass
 
-func denied():
+func _denied():
 	const n_shakes: int = 10
 	const shake_amount: int = 5
 	const shake_duration: float = 0.01
@@ -295,7 +313,7 @@ func _on_button_gui_input(event: InputEvent) -> void:
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			match state:
 				State.FLAGGED:
-					denied()
+					_denied()
 				State.REVEALED:
 					match [is_mine, hint]:
 						[false, Hint.SOLVABLE]:
@@ -307,7 +325,7 @@ func _on_button_gui_input(event: InputEvent) -> void:
 				State.HIDDEN:
 					reveal()
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			toggle_flag()
+			_toggle_flag()
 
 func _is_neighbour(other: Cell) -> bool:
 	# Check if the other cell is a neighbor
