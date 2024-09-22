@@ -125,25 +125,20 @@ var coordinates: Vector2 = Vector2.ZERO:
 @onready var coords_debug: RichTextLabel = $CoordsDebug
 
 func _ready() -> void:
-	Events.cell_flagged.connect(_on_cell_flagged_changed)
-	Events.cell_unflagged.connect(_on_cell_flagged_changed)
-	Events.cell_scored.connect(_on_cell_scored)
-	
+	Events.cell_flagged.connect(_on_cell_changed)
+	Events.cell_unflagged.connect(_on_cell_changed)
+	Events.cell_scored.connect(_on_cell_changed)
+	Events.cell_revealed.connect(_on_cell_changed)
+
 	coords_debug.text = str(coordinates)
-	
 
-func _on_cell_scored(cell: Cell) -> void:
+func _on_cell_changed(cell: Cell) -> void:
 	if !_is_neighbour(cell):
 		return
 	_update_hint()
 
-func _on_cell_flagged_changed(cell: Cell) -> void:
-	if !_is_neighbour(cell):
-		return
-	_update_hint()
-
-func reveal():
-	if !is_hidden:
+func reveal(force: bool = false):
+	if !is_hidden and !force:
 		return
 	
 	if !Game.first_cell_revealed:
@@ -190,23 +185,23 @@ func _declare_scored():
 	var correct_flags: Array[Cell] = []
 	var errors: Array[Cell] = []
 	var neighbors = map.get_neighbors(self)
-	for neighbor in neighbors:
-		if !neighbor.is_flagged:
+	for n in neighbors:
+		if !n.is_flagged or n.is_scored:
 			continue
-		if neighbor.is_mine:
-			correct_flags.append(neighbor)
+		if n.is_mine:
+			correct_flags.append(n)
 		else:
-			errors.append(neighbor)
+			errors.append(n)
 	
 	if errors.is_empty():
-		for neighbor in correct_flags:
-			neighbor.is_scored = true
+		for n in correct_flags:
+			n.is_scored = true
 		is_scored = true
 		Events.mines_confirmed.emit(correct_flags)
 	else:
 		for cell in errors:
 			cell.is_flagged = false
-			await cell.reveal()
+			await cell.reveal(true)
 
 func _update_hint():
 	if is_scored or is_hidden or number == 0 or is_mine:
@@ -270,10 +265,12 @@ func _set_scored(yes: bool):
 		scored.hide()
 		return
 	scored.show()
-	var tween = create_tween()
 	var target_scale = scored.scale
 	scored.scale = Vector2.ZERO
-	tween.tween_property(scored, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
+	var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT).set_parallel()
+	tween.tween_property(scored, "scale", target_scale, 0.5)
+	if is_flagged:
+		tween.tween_property(button, "modulate", Color.GOLD, 0.5)
 	await tween.finished
 
 func _reveal_neighbors():
