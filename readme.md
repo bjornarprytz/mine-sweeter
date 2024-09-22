@@ -10,24 +10,17 @@ It's a clone of the game "Minesweeper" with a few twists:
 
 ## TODO
 
+- Juice the cards:
+  - Color according to value
+  - Make jiggly
+
 - Initialization
   - Tutorialize the open of a cell
 
-- When you hover a scorable cell, highlight the flags that will be scored
-- Visually indicate scored cells
-
-- Mines
-  - Value mines (4, 5, or 6)
-    - Update hard-coded mine values in main.gd
-
 - Tripping a mine
   - Either
-    - Mill X cards, where X is the mine value
-    - Add X bad cards
-
-- Scoring mines
-  - Discard the scored cards?
-  - Make the mine unable to be scored again
+    - Mill a cards
+    - Add 2 bad cards
 
 - QoL
   - Check mark cells that are completely flagged/mined

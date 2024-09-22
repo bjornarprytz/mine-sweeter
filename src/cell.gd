@@ -122,6 +122,7 @@ var coordinates: Vector2 = Vector2.ZERO:
 @onready var check: Sprite2D = %Check
 @onready var solve: Sprite2D = %Solve
 @onready var scored: Sprite2D = %Scored
+@onready var score_highlight: CPUParticles2D = %ScoreHighlight
 @onready var coords_debug: RichTextLabel = $CoordsDebug
 
 func _ready() -> void:
@@ -136,6 +137,9 @@ func _on_cell_changed(cell: Cell) -> void:
 	if !_is_neighbour(cell):
 		return
 	_update_hint()
+
+func highlight(on: bool):
+	score_highlight.emitting = on
 
 func reveal(force: bool = false):
 	if !is_hidden and !force:
@@ -337,3 +341,17 @@ func _is_neighbour(other: Cell) -> bool:
 	
 	# A cell is a neighbor if it's adjacent horizontally, vertically, or diagonally. dy and dx can't both be 0
 	return dx <= 1 and dy <= 1 and (dx != 0 or dy != 0)
+
+
+func _on_button_mouse_entered() -> void:
+	if !is_scorable:
+		return
+	
+	for n in map.get_neighbors(self):
+		if n.is_flagged and !n.is_scored:
+			n.highlight(true)
+
+
+func _on_button_mouse_exited() -> void:
+	for n in map.get_neighbors(self):
+		n.highlight(false)

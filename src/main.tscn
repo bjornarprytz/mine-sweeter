@@ -1,10 +1,12 @@
-[gd_scene load_steps=6 format=3 uid="uid://cgrejd4v5ywd3"]
+[gd_scene load_steps=8 format=3 uid="uid://cgrejd4v5ywd3"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_30g2o"]
 [ext_resource type="Script" path="res://camera.gd" id="2_gi7hc"]
 [ext_resource type="PackedScene" uid="uid://cx0f7aqu2rweo" path="res://deck.tscn" id="2_skvlw"]
 [ext_resource type="PackedScene" uid="uid://l0fykk82x6xx" path="res://map.tscn" id="3_sidb8"]
 [ext_resource type="PackedScene" uid="uid://c078gtukoewfd" path="res://card_scoring.tscn" id="3_vv2er"]
+[ext_resource type="Texture2D" uid="uid://cfmwg40thifnj" path="res://assets/circle.png" id="4_cvydt"]
+[ext_resource type="Texture2D" uid="uid://8likk7rh2t0d" path="res://assets/ring.png" id="4_xyq7o"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_30g2o")
@@ -26,24 +28,60 @@ grow_horizontal = 0
 grow_vertical = 0
 
 [node name="ScoreContainer" type="PanelContainer" parent="CanvasLayer"]
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -205.0
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -102.5
+offset_right = 102.5
 offset_bottom = 75.0
-grow_horizontal = 0
+grow_horizontal = 2
 
 [node name="ScoreLabel" type="RichTextLabel" parent="CanvasLayer/ScoreContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 
-[node name="ExpContainer" type="PanelContainer" parent="CanvasLayer"]
-offset_right = 107.0
-offset_bottom = 101.0
+[node name="ExpProgress" type="TextureProgressBar" parent="CanvasLayer"]
+unique_name_in_owner = true
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -128.0
+offset_bottom = 128.0
+grow_horizontal = 0
+fill_mode = 4
+texture_under = ExtResource("4_xyq7o")
+texture_progress = ExtResource("4_xyq7o")
+tint_under = Color(0.884592, 0.85503, 0.999621, 1)
+tint_progress = Color(2.02149e-06, 0.71236, 0.710543, 1)
 
-[node name="ExpLabel" type="RichTextLabel" parent="CanvasLayer/ExpContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ExpProgress"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/ExpProgress/MarginContainer"]
+self_modulate = Color(0, 0, 0, 1)
+layout_mode = 2
+texture = ExtResource("4_cvydt")
+expand_mode = 1
+
+[node name="CenterContainer" type="CenterContainer" parent="CanvasLayer/ExpProgress/MarginContainer"]
+layout_mode = 2
+
+[node name="ExpLabel" type="RichTextLabel" parent="CanvasLayer/ExpProgress/MarginContainer/CenterContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_font_sizes/normal_font_size = 24
+fit_content = true
+autowrap_mode = 0
 
 [node name="CardScoring" parent="CanvasLayer" instance=ExtResource("3_vv2er")]
 unique_name_in_owner = true

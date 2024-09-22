@@ -1,6 +1,7 @@
 extends Node2D
 
 @onready var score_label: RichTextLabel = %ScoreLabel
+@onready var exp_progress: TextureProgressBar = %ExpProgress
 @onready var exp_label: RichTextLabel = %ExpLabel
 
 @onready var map: Map = %Map
@@ -28,15 +29,19 @@ func _ready():
 	camera.position = map.get_center_cell().position
 
 func _on_cell_revealed(cell: Cell):
-
 	experience -= 1
 	exp_label.clear()
-	exp_label.append_text("[center]%s[/center]" % str(experience))
+	exp_label.append_text("[center]%s[/center]" % str(next_level - experience))
 
 	if experience <= 0:
 		next_level += 2
 		experience = next_level
+		exp_progress.max_value = next_level
 		deck.add_card(Card.Data.good())
+	
+	
+	var tween = create_tween()
+	tween.tween_property(exp_progress, "value", next_level - experience, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 
 
 	if cell.number > 0 or cell.is_mine or cell.is_flagged:
@@ -50,12 +55,18 @@ func _on_cell_revealed(cell: Cell):
 func _on_mine_tripped(_mine: Cell):
 	var mine_value: int = 2 # TODO: Change this
 
-	var cards = deck.pop_cards(mine_value)
 
-	if deck.cards.size() == 0:
-		score_label.clear()
-		score_label.append_text("[center][color=purple]You lose![/color][/center]")
-
+	if randf() < .5:
+		# Mill
+		var cards = deck.pop_cards(mine_value)
+		if deck.cards.size() == 0:
+			score_label.clear()
+			score_label.append_text("[center][color=purple]You lose![/color][/center]")
+	else:
+		# Add junk
+		for i in range(mine_value):
+			deck.add_card(Card.Data.bad())
+		
 func _on_mines_confirmed(mines: Array[Cell]):
 	if mines.size() == 0:
 		return
@@ -64,7 +75,12 @@ func _on_mines_confirmed(mines: Array[Cell]):
 
 	var mine_value: int = 1 # TODO: Change this
 
-	var result = await card_scoring.score_cards(deck.pop_cards(mine_value * mines.size()))
+	var cards_to_score = deck.pop_cards(mine_value * mines.size())
+
+	var result = await card_scoring.score_cards(cards_to_score)
+
+	for card in cards_to_score:
+		deck.add_card(card)
 
 	card_scoring.hide()
 	
