@@ -10,17 +10,16 @@ It's a clone of the game "Minesweeper" with a few twists:
 
 ## TODO
 
-- Juice the cards:
-  - Color according to value
-  - Make jiggly
+- Juice
+  - Add flowers
+    - Cell>Exp
+    - Exp>Deck
+    - Cell>Score
+  - Redo scoring UI
+    - Maybe do a central counter, and cards pop up around it like a poker hand (fanned out)
 
 - Initialization
   - Tutorialize the open of a cell
-
-- Tripping a mine
-  - Either
-    - Mill a cards
-    - Add 2 bad cards
 
 - QoL
   - Check mark cells that are completely flagged/mined

@@ -29,6 +29,7 @@ func _ready():
 	camera.position = map.get_center_cell().position
 
 func _on_cell_revealed(cell: Cell):
+	add_child(Create.ExpFlower(cell, exp_progress))
 	experience -= 1
 	exp_label.clear()
 	exp_label.append_text("[center]%s[/center]" % str(next_level - experience))
@@ -78,6 +79,8 @@ func _on_mines_confirmed(mines: Array[Cell]):
 	var cards_to_score = deck.pop_cards(mine_value * mines.size())
 
 	var result = await card_scoring.score_cards(cards_to_score)
+
+	await get_tree().create_timer(2).timeout
 
 	for card in cards_to_score:
 		deck.add_card(card)

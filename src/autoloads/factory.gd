@@ -5,6 +5,7 @@ extends Node2D
 
 @onready var cell_spawner = preload("res://cell.tscn")
 @onready var card_spawner = preload("res://card.tscn")
+@onready var exp_flower_spawner = preload("res://flowers/exp_flower.tscn")
 
 const mine_frequency: float = .2
 
@@ -22,3 +23,11 @@ func Card(data: Card.Data) -> Card:
 	card.data = data
 
 	return card
+
+func ExpFlower(origin: Node2D, target: Control) -> ExpFlower:
+	var exp_flower = exp_flower_spawner.instantiate() as ExpFlower
+
+	exp_flower.position = origin.position
+	exp_flower.target = target
+
+	return exp_flower

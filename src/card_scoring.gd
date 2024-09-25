@@ -18,6 +18,7 @@ func _update_score_label() -> void:
 	score_label.append_text("[center]%d" % score)
 
 func score_cards(cards: Array[Card.Data]) -> int:
+	score = 0
 	for card in cards:
 		await _score_card(Create.Card(card))
 		await get_tree().create_timer(1.0).timeout
@@ -25,13 +26,9 @@ func score_cards(cards: Array[Card.Data]) -> int:
 	return pop_result()
 
 func _score_card(card: Card):
-	var original_scale = card.scale
-	card.scale = Vector2.ZERO
 	card_container.add_child(card)
 
-	var tween = create_tween().set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
-	tween.tween_property(card, "scale", original_scale, .5)
-	await tween.finished
+	await card.pop_in()
 
 	match card.data.type:
 		Card.Type.MULTIPLIER:
@@ -41,8 +38,6 @@ func _score_card(card: Card):
 
 
 func pop_result() -> int:
-	var result = score
-	score = 0
 	for card in card_container.get_children():
 		card.queue_free()
-	return result
+	return score

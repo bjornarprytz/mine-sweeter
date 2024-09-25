@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://j1khj71binl7"]
+
+[ext_resource type="Texture2D" uid="uid://cfmwg40thifnj" path="res://assets/circle.png" id="1_p7ymn"]
+[ext_resource type="Script" path="res://flowers/exp_flower.gd" id="2_jvon8"]
+
+[node name="ExpFlower" type="Sprite2D"]
+scale = Vector2(0.1, 0.1)
+texture = ExtResource("1_p7ymn")
+script = ExtResource("2_jvon8")

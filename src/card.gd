@@ -66,6 +66,14 @@ var data: Data:
 @onready var value_label: RichTextLabel = %Value
 
 
+func pop_in():
+	var original_scale = scale
+
+	var tween = create_tween()
+	tween.tween_property(self, "scale", original_scale * 1.4, 0.1)
+	tween.tween_property(self, "scale", original_scale, 0.2)
+	await tween.finished
+
 func _ready() -> void:
 	_update_label()
 
@@ -74,10 +82,12 @@ func _update_label():
 	if data == null:
 		return
 
-	var _sign = "-" if data.value < 0 else "+"
+	var _sign = "-" if data.value < 0 else ""
 
-	if data.value == 0:
-		_sign = ""
+	if data.value < 0:
+		modulate = Color(1, 0.5, 0.5) # Light red for negative values
+	else:
+		modulate = Color(0.5, 1, 0.5) # Light green for positive values
 
 	match data.type:
 		Type.VALUE:
