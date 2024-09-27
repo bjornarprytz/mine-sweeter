@@ -29,21 +29,9 @@ func _ready():
 	camera.position = map.get_center_cell().position
 
 func _on_cell_revealed(cell: Cell):
-	add_child(Create.ExpFlower(cell, exp_progress))
-	experience -= 1
-	exp_label.clear()
-	exp_label.append_text("[center]%s[/center]" % str(next_level - experience))
-
-	if experience <= 0:
-		next_level += 2
-		experience = next_level
-		exp_progress.max_value = next_level
-		deck.add_card(Card.Data.good())
-	
-	
-	var tween = create_tween()
-	tween.tween_property(exp_progress, "value", next_level - experience, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-
+	var exp_flower = Create.ExpFlower(cell.position, exp_progress)
+	exp_flower.terminus.connect(_progress_exp)
+	add_child(exp_flower)
 
 	if cell.number > 0 or cell.is_mine or cell.is_flagged:
 		return
@@ -53,9 +41,34 @@ func _on_cell_revealed(cell: Cell):
 	for neighbor in map.get_neighbors(cell):
 		neighbor.reveal()
 
+
+func _progress_exp():
+	experience -= 1
+	exp_label.clear()
+	exp_label.append_text("[center]%s[/center]" % str(next_level - experience))
+	var tween = create_tween()
+	tween.tween_property(exp_progress, "value", next_level - experience, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+	if experience <= 0:
+		next_level += 2
+		experience = next_level
+		exp_progress.max_value = next_level
+		_ding()
+
+func _ding():
+	var card_data = Card.Data.good()
+	# Find the world position of the exp_progress, which is a UI element
+	var origin = get_canvas_transform().affine_inverse() * (exp_progress.position + (exp_progress.get_rect().size / 2))
+	print(origin)
+	var card_flower = Create.CardFlower(origin, deck, card_data)
+	card_flower.terminus.connect(_add_card.bind(card_data))
+	add_child(card_flower)
+
+func _add_card(card_data: Card.Data):
+	deck.add_card(card_data)
+
 func _on_mine_tripped(_mine: Cell):
 	var mine_value: int = 2 # TODO: Change this
-
 
 	if randf() < .5:
 		# Mill

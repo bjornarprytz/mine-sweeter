@@ -1,6 +1,10 @@
-class_name ExpFlower
-extends Sprite2D
+class_name CardFlower
+extends Node2D
 
+@onready var card: Card = $Card
+
+
+var card_data: Card.Data
 var target: Control
 var camera: Camera2D
 
@@ -11,6 +15,7 @@ signal terminus
 
 func _ready() -> void:
 	camera = get_viewport().get_camera_2d()
+	card.data = card_data
 
 func _process(delta: float) -> void:
 	# Convert the UI element's position to world space

@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3 uid="uid://cqsy8wi2ydoep"]
+
+[ext_resource type="Script" path="res://flowers/card_flower.gd" id="1_03udd"]
+[ext_resource type="PackedScene" uid="uid://xre67uirv4dq" path="res://card.tscn" id="1_jtlpd"]
+
+[node name="CardFlower" type="Node2D"]
+scale = Vector2(0.2, 0.2)
+script = ExtResource("1_03udd")
+
+[node name="Card" parent="." instance=ExtResource("1_jtlpd")]
