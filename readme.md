@@ -11,7 +11,18 @@ It's a clone of the game "Minesweeper" with a few twists:
 ## TODO
 
 - Juice
-  - Sound effects
+  - Tweak sound effects much more
+  - Sound effects (adjust with random pitch)
+    - Scoring
+      - Reveal cards
+      - Add points
+    - Deck
+      - Add card
+      - Remove cards (Mine)
+    - Cell
+      - Reveal (Good/Mine)
+      - Flag/Unflag
+      - Add exp
   - Destroy cards
     - Particles
 
@@ -22,6 +33,10 @@ It's a clone of the game "Minesweeper" with a few twists:
   - Check mark cells that are completely flagged/mined
   - Grey out cells that are safe, and mines that are flagged and confirmed
   - Option: Auto-flag cells where it's obvious (sum unrevealed adjacent cells, if the sum is the value of the cell, then all unrevealed cells are mines)
+
+- Attribution:
+  - Sound Effects from <a href="https://pixabay.com/sound-effects/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=43207">Pixabay</a>
+  - Sound Effect by <a href="https://pixabay.com/users/driken5482-45721595/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=236671">Driken Stan</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=236671">Pixabay</a>
 
 - Push release with `./push_release.sh`
 

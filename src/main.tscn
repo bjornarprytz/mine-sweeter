@@ -123,4 +123,7 @@ map = NodePath("../Map")
 [node name="Map" parent="." instance=ExtResource("3_sidb8")]
 unique_name_in_owner = true
 
+[node name="Audio" type="AudioStreamPlayer" parent="."]
+unique_name_in_owner = true
+
 [connection signal="pressed" from="CanvasLayer/GameOver/CenterContainer/RestartButton" to="." method="_on_restart_button_pressed"]
