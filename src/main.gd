@@ -8,6 +8,7 @@ extends Node2D
 @onready var camera: Camera2D = %Camera
 @onready var deck: Deck = %Deck
 @onready var card_scoring: CardScoring = %CardScoring
+@onready var game_over: Panel = $CanvasLayer/GameOver
 
 var score: float = 0.0:
 	set(value):
@@ -27,6 +28,8 @@ func _ready():
 	Events.mine_tripped.connect(_on_mine_tripped)
 	Events.mines_confirmed.connect(_on_mines_confirmed)
 	camera.position = map.get_center_cell().position
+	modulate.a = 0
+	create_tween().tween_property(self, "modulate:a", 1, 1)
 
 func _on_cell_revealed(cell: Cell):
 	if cell.is_mine:
@@ -78,22 +81,21 @@ func _on_mine_tripped(mine: Cell):
 
 func _mine_effect():
 	var mine_value: int = 2 # TODO: Change this
-	if randf() < .5:
-		# Mill
-		var cards = deck.pop_cards(mine_value)
-		if deck.cards.size() == 0:
-			score_label.clear()
-			score_label.append_text("[center][color=purple]You lose![/color][/center]")
-	else:
-		# Add junk
-		for i in range(mine_value):
-			deck.add_card(Card.Data.bad())
-		
+	var cards = deck.pop_cards(mine_value)
+
+	await Utils.shake(camera, 0.069, 10)
+
+	if deck.cards.size() == 0:
+		score_label.clear()
+		score_label.append_text("[center][color=purple]You lose![/color][/center]")
+		await deck.explode().finished
+		game_over.show()
+		game_over.modulate.a = 0
+		create_tween().tween_property(game_over, "modulate:a", 1, 1)
+
 func _on_mines_confirmed(mines: Array[Cell]):
 	if mines.size() == 0:
 		return
-
-	card_scoring.show()
 
 	var mine_value: int = 1 # TODO: Change this
 
@@ -101,12 +103,20 @@ func _on_mines_confirmed(mines: Array[Cell]):
 
 	var result = await card_scoring.score_cards(cards_to_score)
 
-	await get_tree().create_timer(2).timeout
+	var origin = get_canvas_transform().affine_inverse() * (card_scoring.position + (card_scoring.get_rect().size / 2))
+
+	for s in range(abs(result)):
+		var score_flower = Create.ScoreFlower(origin, score_label.get_parent())
+		score_flower.terminus.connect(_add_score.bind(mine_value))
+		add_child(score_flower)
+		score_flower.position.x += randf_range(-20, 20)
+		await get_tree().create_timer(randf_range(.05, .1)).timeout
 
 	for card in cards_to_score:
 		deck.add_card(card)
 
-	card_scoring.hide()
-	
-	var tween = create_tween()
-	tween.tween_property(self, "score", score + result, 1.0)
+func _add_score(value: int):
+	score += value
+
+func _on_restart_button_pressed() -> void:
+	get_tree().change_scene_to_file("res://loading_screen.tscn")

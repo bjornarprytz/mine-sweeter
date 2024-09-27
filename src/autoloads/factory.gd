@@ -8,6 +8,7 @@ extends Node2D
 @onready var exp_flower_spawner = preload("res://flowers/exp_flower.tscn")
 @onready var card_flower_spawner = preload("res://flowers/card_flower.tscn")
 @onready var mine_flower_spawner = preload("res://flowers/mine_flower.tscn")
+@onready var score_flower_spawner = preload("res://flowers/score_flower.tscn")
 
 const mine_frequency: float = .2
 
@@ -26,8 +27,8 @@ func Card(data: Card.Data) -> Card:
 
 	return card
 
-func ExpFlower(origin: Vector2, target: Control) -> ExpFlower:
-	var exp_flower = exp_flower_spawner.instantiate() as ExpFlower
+func ExpFlower(origin: Vector2, target: Control) -> Flower:
+	var exp_flower = exp_flower_spawner.instantiate() as Flower
 
 	exp_flower.position = origin
 	exp_flower.target = target
@@ -45,7 +46,7 @@ func CardFlower(origin: Vector2, target: Control, card_data: Card.Data) -> CardF
 
 
 func MineFlower(origin: Vector2, target: Control) -> MineFlower:
-	var mine_flower = mine_flower_spawner.instantiate() as MineFlower
+	var mine_flower = mine_flower_spawner.instantiate() as Flower
 
 	mine_flower.position = origin
 	mine_flower.target = target
@@ -54,3 +55,15 @@ func MineFlower(origin: Vector2, target: Control) -> MineFlower:
 	mine_flower.rotation_speed = randf() * 360
 
 	return mine_flower
+
+
+func ScoreFlower(origin: Vector2, target: Control) -> Flower:
+	var score_flower = score_flower_spawner.instantiate() as Flower
+
+	score_flower.position = origin
+	score_flower.target = target
+	score_flower.modulate = Color.GREEN * randf_range(.5, 1)
+	score_flower.modulate.a = 1
+	score_flower.rotation_speed = randf() * 360
+
+	return score_flower

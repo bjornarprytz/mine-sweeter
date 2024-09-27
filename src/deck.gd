@@ -2,6 +2,7 @@ class_name Deck
 extends Control
 
 @onready var label: RichTextLabel = %Label
+@onready var explosion: CPUParticles2D = $Explosion
 
 var cards: Array[Card.Data] = []
 
@@ -23,3 +24,9 @@ func pop_cards(n: int) -> Array[Card.Data]:
 
 func shuffle() -> void:
 	cards.shuffle()
+
+func explode() -> CPUParticles2D:
+	explosion.emitting = true
+	explosion.reparent(get_parent())
+	queue_free()
+	return explosion

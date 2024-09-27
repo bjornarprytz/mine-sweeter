@@ -1,8 +1,8 @@
 [gd_scene load_steps=3 format=3 uid="uid://j1khj71binl7"]
 
 [ext_resource type="Texture2D" uid="uid://b37cqs7gt3l7m" path="res://assets/die-0.png" id="1_x7fwa"]
-[ext_resource type="Script" path="res://flowers/exp_flower.gd" id="2_jvon8"]
+[ext_resource type="Script" path="res://flowers/flower.gd" id="2_u52bx"]
 
 [node name="ExpFlower" type="Sprite2D"]
 texture = ExtResource("1_x7fwa")
-script = ExtResource("2_jvon8")
+script = ExtResource("2_u52bx")

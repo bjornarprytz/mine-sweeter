@@ -1,5 +1,5 @@
-class_name ExpFlower
-extends Sprite2D
+class_name Flower
+extends Node2D
 
 var target: Control
 var camera: Camera2D

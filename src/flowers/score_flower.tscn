@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://cxl1m1wooxbr"]
+
+[ext_resource type="Texture2D" uid="uid://b3dojbv7i1k6q" path="res://assets/star.png" id="1_iqgls"]
+[ext_resource type="Script" path="res://flowers/flower.gd" id="1_p0dlx"]
+
+[node name="ScoreFlower" type="Sprite2D"]
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("1_iqgls")
+script = ExtResource("1_p0dlx")

@@ -11,12 +11,9 @@ It's a clone of the game "Minesweeper" with a few twists:
 ## TODO
 
 - Juice
-  - Add flowers
-    - Cell>Exp
-    - Exp>Deck
-    - Cell>Score
-  - Redo scoring UI
-    - Maybe do a central counter, and cards pop up around it like a poker hand (fanned out)
+  - Sound effects
+  - Destroy cards
+    - Particles
 
 - Initialization
   - Tutorialize the open of a cell

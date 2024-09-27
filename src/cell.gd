@@ -298,17 +298,12 @@ func _toggle_flag():
 			pass
 
 func _denied():
-	const n_shakes: int = 10
-	const shake_amount: int = 5
-	const shake_duration: float = 0.01
-	var tween = create_tween()
 	
 	var original_color = button.modulate
 	button.modulate = Color(.8, .2, .2) # A more intense red color
 	
-	for i in range(n_shakes):
-		tween.tween_property(self, "position", position + Vector2(randf_range(-shake_amount, shake_amount), randf_range(-shake_amount, shake_amount)), shake_duration)
-		tween.tween_property(self, "position", position, shake_duration)
+	await Utils.shake(self, .2, 5)
+	var tween = create_tween()
 	tween.tween_property(button, "modulate", original_color, .1)
 	await tween.finished
 
