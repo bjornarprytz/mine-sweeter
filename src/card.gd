@@ -82,8 +82,6 @@ func _update_label():
 	if data == null:
 		return
 
-	var _sign = "-" if data.value < 0 else ""
-
 	if data.value < 0:
 		modulate = Color(1, 0.5, 0.5) # Light red for negative values
 	else:
@@ -91,6 +89,6 @@ func _update_label():
 
 	match data.type:
 		Type.VALUE:
-			value_label.append_text("[center]%s%s" % [_sign, str(data.value)])
+			value_label.append_text("[center]%s" % [str(data.value)])
 		Type.MULTIPLIER:
-			value_label.append_text("[center]x%s%s" % [_sign, str(data.value)])
+			value_label.append_text("[center]x%s" % [str(data.value)])

@@ -29,11 +29,14 @@ func _ready():
 	camera.position = map.get_center_cell().position
 
 func _on_cell_revealed(cell: Cell):
+	if cell.is_mine:
+		return
+
 	var exp_flower = Create.ExpFlower(cell.position, exp_progress)
 	exp_flower.terminus.connect(_progress_exp)
 	add_child(exp_flower)
 
-	if cell.number > 0 or cell.is_mine or cell.is_flagged:
+	if cell.number > 0 or cell.is_flagged:
 		return
 
 	await get_tree().create_timer(0.1).timeout
@@ -67,9 +70,14 @@ func _ding():
 func _add_card(card_data: Card.Data):
 	deck.add_card(card_data)
 
-func _on_mine_tripped(_mine: Cell):
-	var mine_value: int = 2 # TODO: Change this
+func _on_mine_tripped(mine: Cell):
+	var mine_flower = Create.MineFlower(mine.position, deck)
+	mine_flower.terminus.connect(_mine_effect)
+	add_child(mine_flower)
 
+
+func _mine_effect():
+	var mine_value: int = 2 # TODO: Change this
 	if randf() < .5:
 		# Mill
 		var cards = deck.pop_cards(mine_value)
