@@ -2,6 +2,7 @@ class_name Cell
 extends Node2D
 
 const size: int = 64
+const SFX_REVEAL = preload("res://assets/audio/mech-keyboard-02-102918.mp3")
 
 enum Type {
 	EMPTY,
@@ -124,6 +125,7 @@ var coordinates: Vector2 = Vector2.ZERO:
 @onready var scored: Sprite2D = %Scored
 @onready var score_highlight: CPUParticles2D = %ScoreHighlight
 @onready var coords_debug: RichTextLabel = $CoordsDebug
+@onready var audio: AudioStreamPlayer2D = $Audio
 
 func _ready() -> void:
 	Events.cell_flagged.connect(_on_cell_changed)
@@ -176,6 +178,10 @@ func reveal(force: bool = false):
 				tag.append_text("[center][color=blue]%s[/color][/center]" % str(number))
 			else:
 				button.modulate = Color(0.7, 0.7, 0.7) # Darkened color for empty cells (0)
+
+	audio.stream = SFX_REVEAL
+	audio.pitch_scale = 1 + (randf() - 0.5) * 0.1
+	audio.play()
 
 	state = State.REVEALED
 	_update_hint()

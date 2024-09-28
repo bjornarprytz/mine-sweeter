@@ -1,8 +1,7 @@
 extends Node2D
 
 @onready var score_label: RichTextLabel = %ScoreLabel
-@onready var exp_progress: TextureProgressBar = %ExpProgress
-@onready var exp_label: RichTextLabel = %ExpLabel
+@onready var exp_progress: ExperienceProgress = %ExpProgress
 
 @onready var map: Map = %Map
 @onready var camera: Camera2D = %Camera
@@ -19,8 +18,6 @@ var score: float = 0.0:
 		score_label.clear()
 		score_label.append_text("[center]%s[/center]" % str(int(score)))
 
-var next_level: int = 6
-var experience: int = next_level
 
 func _ready():
 	map.create_grid()
@@ -42,36 +39,21 @@ func _on_cell_revealed(cell: Cell):
 	if cell.number > 0 or cell.is_flagged:
 		return
 
-	await get_tree().create_timer(0.1).timeout
 
-	for neighbor in map.get_neighbors(cell):
+	var neighbors = map.get_neighbors(cell)
+	neighbors.shuffle()
+	for neighbor in neighbors:
+		if neighbor.is_revealed:
+			continue
+		await get_tree().create_timer(.069).timeout
 		neighbor.reveal()
 
 
 func _progress_exp():
-	experience -= 1
-	exp_label.clear()
-	exp_label.append_text("[center]%s[/center]" % str(next_level - experience))
-	var tween = create_tween()
-	tween.tween_property(exp_progress, "value", next_level - experience, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if exp_progress == null:
+		return
+	exp_progress.add_exp(1)
 
-	if experience <= 0:
-		next_level += 2
-		experience = next_level
-		exp_progress.max_value = next_level
-		_ding()
-
-func _ding():
-	var card_data = Card.Data.good()
-	# Find the world position of the exp_progress, which is a UI element
-	var origin = get_canvas_transform().affine_inverse() * (exp_progress.position + (exp_progress.get_rect().size / 2))
-	print(origin)
-	var card_flower = Create.CardFlower(origin, deck, card_data)
-	card_flower.terminus.connect(_add_card.bind(card_data))
-	add_child(card_flower)
-
-func _add_card(card_data: Card.Data):
-	deck.add_card(card_data)
 
 func _on_mine_tripped(mine: Cell):
 	var mine_flower = Create.MineFlower(mine.position, deck)
@@ -80,7 +62,7 @@ func _on_mine_tripped(mine: Cell):
 
 func _mine_effect():
 	var mine_value: int = 2 # TODO: Change this
-	var cards = deck.pop_cards(mine_value)
+	var cards = deck.pop_cards(mine_value, true)
 
 	await Utils.shake(camera, 0.069, 10).finished
 

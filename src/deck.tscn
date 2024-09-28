@@ -66,3 +66,6 @@ initial_velocity_min = 500.0
 initial_velocity_max = 900.0
 scale_amount_min = 10.0
 scale_amount_max = 50.0
+
+[node name="Audio" type="AudioStreamPlayer" parent="."]
+volume_db = -10.0

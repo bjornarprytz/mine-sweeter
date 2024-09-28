@@ -1,10 +1,11 @@
-[gd_scene load_steps=7 format=3 uid="uid://c56h7duus2w00"]
+[gd_scene load_steps=8 format=3 uid="uid://c56h7duus2w00"]
 
 [ext_resource type="Script" path="res://cell.gd" id="1_tp1ua"]
 [ext_resource type="Theme" uid="uid://bhttketftlysp" path="res://global_theme.tres" id="2_mc104"]
 [ext_resource type="Texture2D" uid="uid://dqnvw6wkptehh" path="res://assets/ok-2307342_1280.png" id="3_cqlfs"]
 [ext_resource type="Texture2D" uid="uid://cfmwg40thifnj" path="res://assets/circle.png" id="4_a0aar"]
 [ext_resource type="Texture2D" uid="uid://b3dojbv7i1k6q" path="res://assets/star.png" id="5_db5xf"]
+[ext_resource type="AudioStream" uid="uid://b63qno5yrhnow" path="res://assets/audio/mech-keyboard-02-102918.mp3" id="6_gpjk1"]
 
 [sub_resource type="Curve" id="Curve_37b68"]
 min_value = -1.0
@@ -103,6 +104,10 @@ bbcode_enabled = true
 text = "(11,23)"
 fit_content = true
 autowrap_mode = 0
+
+[node name="Audio" type="AudioStreamPlayer2D" parent="."]
+stream = ExtResource("6_gpjk1")
+volume_db = -10.0
 
 [connection signal="gui_input" from="Button" to="." method="_on_button_gui_input"]
 [connection signal="mouse_entered" from="Button" to="." method="_on_button_mouse_entered"]
