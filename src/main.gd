@@ -1,12 +1,8 @@
 extends Node2D
-const BUBBLE_SOUND = preload("res://assets/audio/bubble-sound.wav")
-const POP = preload("res://assets/audio/pop.wav")
-const RETRO_COIN = preload("res://assets/audio/retro-coin.wav")
 
 @onready var score_label: RichTextLabel = %ScoreLabel
 @onready var exp_progress: TextureProgressBar = %ExpProgress
 @onready var exp_label: RichTextLabel = %ExpLabel
-@onready var audio: AudioStreamPlayer = %Audio
 
 @onready var map: Map = %Map
 @onready var camera: Camera2D = %Camera
@@ -36,9 +32,6 @@ func _ready():
 	create_tween().tween_property(self, "modulate:a", 1, 1)
 
 func _on_cell_revealed(cell: Cell):
-
-	audio.stream = BUBBLE_SOUND
-	audio.play()
 	if cell.is_mine:
 		return
 
@@ -61,8 +54,6 @@ func _progress_exp():
 	exp_label.append_text("[center]%s[/center]" % str(next_level - experience))
 	var tween = create_tween()
 	tween.tween_property(exp_progress, "value", next_level - experience, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
-	audio.stream = POP
-	audio.play()
 
 	if experience <= 0:
 		next_level += 2
@@ -91,7 +82,7 @@ func _mine_effect():
 	var mine_value: int = 2 # TODO: Change this
 	var cards = deck.pop_cards(mine_value)
 
-	await Utils.shake(camera, 0.069, 10)
+	await Utils.shake(camera, 0.069, 10).finished
 
 	if deck.cards.size() == 0:
 		score_label.clear()
@@ -125,8 +116,6 @@ func _on_mines_confirmed(mines: Array[Cell]):
 
 func _add_score(value: int):
 	score += value
-	audio.stream = RETRO_COIN
-	audio.play()
 
 func _on_restart_button_pressed() -> void:
 	get_tree().change_scene_to_file("res://loading_screen.tscn")

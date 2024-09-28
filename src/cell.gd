@@ -153,12 +153,7 @@ func reveal(force: bool = false):
 		for n in map.get_neighbors(self):
 			n.type = Type.EMPTY
 
-
-	var tween = create_tween()
-	tween.tween_property(self, "scale", Vector2(1.2, 1.2), 0.05)
-	tween.tween_property(self, "scale", Vector2(0.8, 0.8), 0.05)
-	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.05)
-	await tween.finished
+	await Utils.jiggle(button, .2).finished
 
 	var neighbors = map.get_neighbors(self)
 	number = 0
@@ -247,32 +242,21 @@ func _set_ready_to_solve(yes: bool):
 		solve.hide()
 		return
 	solve.show()
-	var tween = create_tween()
-	var target_scale = solve.scale
-	solve.scale = Vector2.ZERO
-	tween.tween_property(solve, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	await tween.finished
+	await Utils.jelly_scale(solve, 0.5).finished
 	
 func _set_ready_to_score(yes: bool):
 	if !yes:
 		check.hide()
 		return
 	check.show()
-	var tween = create_tween()
-	var target_scale = check.scale
-	check.scale = Vector2.ZERO
-	tween.tween_property(check, "scale", target_scale, 0.5).set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT)
-	await tween.finished
+	await Utils.jelly_scale(check, 0.5).finished
 
 func _set_scored(yes: bool):
 	if !yes:
 		scored.hide()
 		return
 	scored.show()
-	var target_scale = scored.scale
-	scored.scale = Vector2.ZERO
-	var tween = create_tween().set_trans(Tween.TRANS_ELASTIC).set_ease(Tween.EASE_OUT).set_parallel()
-	tween.tween_property(scored, "scale", target_scale, 0.5)
+	var tween = Utils.jelly_scale(scored, 0.5).set_parallel()
 	if is_flagged:
 		tween.tween_property(button, "modulate", Color.GOLD, 0.5)
 	await tween.finished
@@ -302,7 +286,7 @@ func _denied():
 	var original_color = button.modulate
 	button.modulate = Color(.8, .2, .2) # A more intense red color
 	
-	await Utils.shake(self, .2, 5)
+	await Utils.shake(self, .2, 5).finished
 	var tween = create_tween()
 	tween.tween_property(button, "modulate", original_color, .1)
 	await tween.finished

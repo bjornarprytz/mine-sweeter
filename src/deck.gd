@@ -4,11 +4,15 @@ extends Control
 @onready var label: RichTextLabel = %Label
 @onready var explosion: CPUParticles2D = $Explosion
 
+@onready var base_label_scale = label.scale
+
 var cards: Array[Card.Data] = []
 
 func add_card(card: Card.Data) -> void:
 	cards.push_back(card)
 	label.text = str(cards.size())
+
+	await Utils.jiggle(label, 0.1).finished
 
 func pop_cards(n: int) -> Array[Card.Data]:
 	var drawn_cards: Array[Card.Data] = []
