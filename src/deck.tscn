@@ -1,7 +1,28 @@
-[gd_scene load_steps=3 format=3 uid="uid://cx0f7aqu2rweo"]
+[gd_scene load_steps=6 format=3 uid="uid://cx0f7aqu2rweo"]
 
 [ext_resource type="Script" path="res://deck.gd" id="1_euoki"]
 [ext_resource type="Texture2D" uid="uid://b3j5t5dtouj45" path="res://assets/panel-texture.png" id="2_58kej"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_mprtj"]
+texture = ExtResource("2_58kej")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_8kfii"]
+texture = ExtResource("2_58kej")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_jsdwu"]
+texture = ExtResource("2_58kej")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
 
 [node name="Deck" type="Control"]
 custom_minimum_size = Vector2(150, 200)
@@ -37,17 +58,29 @@ patch_margin_top = 8
 patch_margin_right = 8
 patch_margin_bottom = 8
 
-[node name="PanelContainer" type="PanelContainer" parent="."]
+[node name="PanelContainer" type="Button" parent="."]
 layout_mode = 0
 offset_right = 124.0
 offset_bottom = 166.0
+tooltip_text = "Contains cards used 
+when scoring cells.
+Mines destroy cards."
+theme_override_styles/focus = SubResource("StyleBoxTexture_mprtj")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_8kfii")
+theme_override_styles/normal = SubResource("StyleBoxTexture_jsdwu")
 
 [node name="CenterContainer" type="CenterContainer" parent="PanelContainer"]
 layout_mode = 2
+offset_left = 9.0
+offset_top = 9.0
+offset_right = 115.0
+offset_bottom = 157.0
+mouse_filter = 2
 
 [node name="Label" type="RichTextLabel" parent="PanelContainer/CenterContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+mouse_filter = 2
 fit_content = true
 autowrap_mode = 0
 
@@ -69,3 +102,6 @@ scale_amount_max = 50.0
 
 [node name="Audio" type="AudioStreamPlayer" parent="."]
 volume_db = -10.0
+
+[connection signal="gui_input" from="." to="." method="_on_gui_input"]
+[connection signal="pressed" from="PanelContainer" to="." method="_on_panel_container_pressed"]

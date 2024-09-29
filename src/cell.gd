@@ -109,6 +109,7 @@ var hint: Hint = Hint.NONE:
 				_set_scored(true)
 				Events.cell_scored.emit(self)
 
+var is_moused: bool = false
 var number: int = 0
 var map: Map
 
@@ -299,7 +300,7 @@ func _denied():
 
 func _on_button_gui_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and !event.is_pressed():
-		if is_scored:
+		if is_scored or !is_moused:
 			return
 		if event.button_index == MOUSE_BUTTON_LEFT:
 			print("-click- %s" % coordinates)
@@ -329,6 +330,8 @@ func _is_neighbour(other: Cell) -> bool:
 
 
 func _on_button_mouse_entered() -> void:
+	is_moused = true
+
 	if !is_scorable:
 		return
 	
@@ -338,5 +341,6 @@ func _on_button_mouse_entered() -> void:
 
 
 func _on_button_mouse_exited() -> void:
+	is_moused = false
 	for n in map.get_neighbors(self):
 		n.highlight(false)

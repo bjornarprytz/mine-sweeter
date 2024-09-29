@@ -9,6 +9,9 @@ const SFX_ADD = preload("res://assets/audio/water-droplet-5-165635.mp3")
 @onready var audio: AudioStreamPlayer = $Audio
 
 @onready var base_label_scale = label.scale
+@onready var back_card: NinePatchRect = $BackCard
+@onready var middle_card: NinePatchRect = $MiddleCard
+@onready var panel_container: Button = $PanelContainer
 
 var cards: Array[Card.Data] = []
 
@@ -43,8 +46,19 @@ func pop_cards(n: int, ill_intent: bool = false) -> Array[Card.Data]:
 func shuffle() -> void:
 	cards.shuffle()
 
+	Utils.shake(panel_container, .2, 10)
+	Utils.shake(middle_card, .2, 10)
+	Utils.shake(back_card, .2, 10)
+
 func explode() -> CPUParticles2D:
 	explosion.emitting = true
 	explosion.reparent(get_parent())
-	queue_free()
+	audio.stream = SFX_HURT
+	audio.pitch_scale = .5
+	audio.play()
+	audio.finished.connect(queue_free)
 	return explosion
+
+
+func _on_panel_container_pressed() -> void:
+	shuffle()

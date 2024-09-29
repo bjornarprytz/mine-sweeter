@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cgrejd4v5ywd3"]
+[gd_scene load_steps=12 format=3 uid="uid://cgrejd4v5ywd3"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_30g2o"]
 [ext_resource type="Script" path="res://camera.gd" id="2_gi7hc"]
@@ -6,6 +6,17 @@
 [ext_resource type="PackedScene" uid="uid://chjabev6gx81l" path="res://exp_progress.tscn" id="3_6vy86"]
 [ext_resource type="PackedScene" uid="uid://l0fykk82x6xx" path="res://map.tscn" id="3_sidb8"]
 [ext_resource type="PackedScene" uid="uid://c078gtukoewfd" path="res://card_scoring.tscn" id="3_vv2er"]
+[ext_resource type="Texture2D" uid="uid://b3j5t5dtouj45" path="res://assets/panel-texture.png" id="5_a8eoe"]
+[ext_resource type="Texture2D" uid="uid://cfmwg40thifnj" path="res://assets/circle.png" id="5_kmivv"]
+[ext_resource type="Texture2D" uid="uid://dqnvw6wkptehh" path="res://assets/ok-2307342_1280.png" id="6_puxb4"]
+[ext_resource type="Texture2D" uid="uid://b3dojbv7i1k6q" path="res://assets/star.png" id="7_gd3fw"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_1wg0h"]
+texture = ExtResource("5_a8eoe")
+texture_margin_left = 8.0
+texture_margin_top = 8.0
+texture_margin_right = 8.0
+texture_margin_bottom = 8.0
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_30g2o")
@@ -75,6 +86,135 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
 text = "Restart?"
 
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/GameOver"]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -226.5
+offset_top = 200.0
+offset_right = 226.5
+offset_bottom = 296.0
+grow_horizontal = 2
+theme_override_colors/default_color = Color(0.541176, 0, 0.737255, 1)
+bbcode_enabled = true
+text = "[center][wave freq=4]You stepped on a mine 
+and ran out of cards"
+fit_content = true
+autowrap_mode = 0
+
+[node name="Hints" type="Button" parent="CanvasLayer"]
+visible = false
+offset_right = 214.0
+offset_bottom = 110.0
+theme_override_styles/normal = SubResource("StyleBoxTexture_1wg0h")
+
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/Hints"]
+layout_mode = 2
+offset_left = 9.0
+offset_top = 9.0
+offset_right = 205.0
+offset_bottom = 101.0
+mouse_filter = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasLayer/Hints/MarginContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 16
+bbcode_enabled = true
+text = "[u]Cell icons:"
+fit_content = true
+autowrap_mode = 0
+
+[node name="Control" type="Control" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="Tips" type="VBoxContainer" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Solvable" type="HBoxContainer" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips/Solvable"]
+modulate = Color(0, 0.835294, 0.894118, 1)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_kmivv")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips/Solvable"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 12
+text = ": Reveal adjacent cells"
+fit_content = true
+autowrap_mode = 0
+
+[node name="Scorable" type="HBoxContainer" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips/Scorable"]
+modulate = Color(0.392157, 0.858824, 0.392157, 1)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_puxb4")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips/Scorable"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 12
+text = ": Score adjacent flags"
+fit_content = true
+autowrap_mode = 0
+
+[node name="Scored" type="HBoxContainer" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="TextureRect" type="TextureRect" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips/Scored"]
+modulate = Color(0.823529, 0.74902, 0, 1)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_gd3fw")
+expand_mode = 2
+stretch_mode = 4
+
+[node name="RichTextLabel" type="RichTextLabel" parent="CanvasLayer/Hints/MarginContainer/VBoxContainer/Tips/Scored"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_font_sizes/normal_font_size = 12
+text = ": Scored"
+fit_content = true
+autowrap_mode = 0
+
+[node name="HintsButton" type="Button" parent="CanvasLayer"]
+offset_right = 16.0
+offset_bottom = 16.0
+text = "Hints"
+
 [node name="Camera" type="Camera2D" parent="." node_paths=PackedStringArray("map")]
 unique_name_in_owner = true
 script = ExtResource("2_gi7hc")
@@ -84,3 +224,5 @@ map = NodePath("../Map")
 unique_name_in_owner = true
 
 [connection signal="pressed" from="CanvasLayer/GameOver/CenterContainer/RestartButton" to="." method="_on_restart_button_pressed"]
+[connection signal="pressed" from="CanvasLayer/Hints" to="." method="_on_close_hints_pressed"]
+[connection signal="pressed" from="CanvasLayer/HintsButton" to="." method="_on_hints_button_pressed"]

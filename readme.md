@@ -11,6 +11,11 @@ It's a clone of the game "Minesweeper" with a few twists:
 ## TODO
 
 - Juice
+  - Tooltips
+    - Exp
+      - Show next card to add instead of exp
+  - Scoring
+    - Wait to slide out until all points are added
   - Tweak sound effects much more
   - Sound effects (adjust with random pitch)
     - Scoring

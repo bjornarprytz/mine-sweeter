@@ -2,6 +2,8 @@ extends Node2D
 
 @onready var score_label: RichTextLabel = %ScoreLabel
 @onready var exp_progress: ExperienceProgress = %ExpProgress
+@onready var hints: Button = $CanvasLayer/Hints
+@onready var hints_button: Button = $CanvasLayer/HintsButton
 
 @onready var map: Map = %Map
 @onready var camera: Camera2D = %Camera
@@ -27,6 +29,8 @@ func _ready():
 	camera.position = map.get_center_cell().position
 	modulate.a = 0
 	create_tween().tween_property(self, "modulate:a", 1, 1)
+	score_label.clear()
+	score_label.append_text("[center]%s[/center]" % str(int(score)))
 
 func _on_cell_revealed(cell: Cell):
 	if cell.is_mine:
@@ -67,8 +71,6 @@ func _mine_effect():
 	await Utils.shake(camera, 0.069, 10).finished
 
 	if deck.cards.size() == 0:
-		score_label.clear()
-		score_label.append_text("[center][color=purple]You lose![/color][/center]")
 		await deck.explode().finished
 		game_over.show()
 		game_over.modulate.a = 0
@@ -101,3 +103,11 @@ func _add_score(value: int):
 
 func _on_restart_button_pressed() -> void:
 	get_tree().change_scene_to_file("res://loading_screen.tscn")
+
+func _on_close_hints_pressed() -> void:
+	hints_button.show()
+	hints.hide()
+
+func _on_hints_button_pressed() -> void:
+	hints.show()
+	hints_button.hide()
