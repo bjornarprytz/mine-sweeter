@@ -3,6 +3,8 @@ extends Node2D
 
 const size: int = 64
 const SFX_REVEAL = preload("res://assets/audio/mech-keyboard-02-102918.mp3")
+const SFX_FLAG = preload("res://assets/audio/woosh-230554.wav")
+const SFX_BEEP = preload("res://assets/audio/beep-104060.wav")
 
 enum Type {
 	EMPTY,
@@ -170,6 +172,12 @@ func reveal(force: bool = false):
 		Type.MINE:
 			button.modulate = Color(1, 0.5, 0.5) # Light red for mines
 			tag.append_text("[center][color=red]X[/color][/center]")
+			audio.stream = SFX_BEEP
+			audio.pitch_scale = 1 + (randf() - 0.5) * 0.1
+			for i in range(3):
+				audio.play()
+				Utils.shake(self, .1, 5)
+				await get_tree().create_timer(.3).timeout
 		Type.EMPTY:
 			if number > 0:
 				var hue = (number - 1) / 8.0 + 0.6 # Shift the color wheel so 1 is blue
@@ -179,10 +187,10 @@ func reveal(force: bool = false):
 				tag.append_text("[center][color=blue]%s[/color][/center]" % str(number))
 			else:
 				button.modulate = Color(0.7, 0.7, 0.7) # Darkened color for empty cells (0)
+			audio.stream = SFX_REVEAL
+			audio.pitch_scale = 1 + (randf() - 0.5) * 0.1
+			audio.play()
 
-	audio.stream = SFX_REVEAL
-	audio.pitch_scale = 1 + (randf() - 0.5) * 0.1
-	audio.play()
 
 	state = State.REVEALED
 	_update_hint()
@@ -282,9 +290,15 @@ func _toggle_flag():
 			tag.clear()
 			tag.append_text("[center][color=darkgreen]F[/color][/center]")
 			state = State.FLAGGED
+			audio.stream = SFX_FLAG
+			audio.pitch_scale = 1 + (randf() - 0.5) * 0.1
+			audio.play()
 		State.FLAGGED:
 			tag.clear()
 			state = State.HIDDEN
+			audio.stream = SFX_FLAG
+			audio.pitch_scale = .69 + (randf() - 0.5) * 0.1
+			audio.play()
 		_:
 			pass
 

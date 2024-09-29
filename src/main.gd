@@ -1,9 +1,13 @@
 extends Node2D
+const SFX_SCORE = preload("res://assets/audio/retro-coin.wav")
 
 @onready var score_label: RichTextLabel = %ScoreLabel
+@onready var score_container: PanelContainer = %ScoreContainer
+
 @onready var exp_progress: ExperienceProgress = %ExpProgress
 @onready var hints: Button = $CanvasLayer/Hints
 @onready var hints_button: Button = $CanvasLayer/HintsButton
+@onready var audio: AudioStreamPlayer = $Audio
 
 @onready var map: Map = %Map
 @onready var camera: Camera2D = %Camera
@@ -56,10 +60,12 @@ func _on_cell_revealed(cell: Cell):
 func _progress_exp():
 	if exp_progress == null:
 		return
-	exp_progress.add_exp(1)
+	exp_progress.add_experience(1)
 
 
 func _on_mine_tripped(mine: Cell):
+	if deck == null or deck.is_queued_for_deletion():
+		return
 	var mine_flower = Create.MineFlower(mine.position, deck)
 	mine_flower.terminus.connect(_mine_effect)
 	add_child(mine_flower)
@@ -84,12 +90,14 @@ func _on_mines_confirmed(mines: Array[Cell]):
 
 	var cards_to_score = deck.pop_cards(mine_value * mines.size())
 
+	await card_scoring.slide_in()
+
 	var result = await card_scoring.score_cards(cards_to_score)
 
 	var origin = get_canvas_transform().affine_inverse() * (card_scoring.position + (card_scoring.get_rect().size / 2))
 
 	for s in range(abs(result)):
-		var score_flower = Create.ScoreFlower(origin, score_label.get_parent())
+		var score_flower = Create.ScoreFlower(origin, score_container)
 		score_flower.terminus.connect(_add_score.bind(mine_value))
 		add_child(score_flower)
 		score_flower.position.x += randf_range(-20, 20)
@@ -97,9 +105,14 @@ func _on_mines_confirmed(mines: Array[Cell]):
 
 	for card in cards_to_score:
 		deck.add_card(card)
+	
+	await card_scoring.slide_out()
 
 func _add_score(value: int):
 	score += value
+	audio.stream = SFX_SCORE
+	audio.pitch_scale = .69 + randf_range(-0.069, 0.069)
+	audio.play()
 
 func _on_restart_button_pressed() -> void:
 	get_tree().change_scene_to_file("res://loading_screen.tscn")

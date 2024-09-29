@@ -1,44 +1,51 @@
 class_name ExperienceProgress
 extends TextureProgressBar
 
-const SFX_ADD_EXP = preload("res://assets/audio/single-waterdrop-sound-202543.mp3")
-const SFX_DING = preload("res://assets/audio/simple-note.wav")
+const SFX_ADD_EXP = preload("res://assets/audio/pop.wav")
+const SFX_DING = preload("res://assets/audio/flipcard.wav")
 
 @export var deck: Deck
 
-@onready var exp_label: RichTextLabel = %ExpLabel
+@onready var ding_audio: AudioStreamPlayer = $DingAudio
 @onready var audio: AudioStreamPlayer = $Audio
+@onready var display_card: Card = $Display
 
 var next_level: int = 6
-var experience: int = next_level
+var experience: int = 0
 
 
-func add_exp(exp: int) -> void:
-	experience -= exp
-
-
-	value = next_level - experience
-
-	audio.stream = SFX_ADD_EXP
-	audio.pitch_scale = 1.0 + float(next_level - experience) / next_level
-	audio.play()
+func _ready() -> void:
+	_cycle_card_on_display()
 	
-	if experience <= 0:
-		audio.stream = SFX_DING
-		audio.pitch_scale = 1
+
+func add_experience(added_exp: int) -> void:
+	experience += added_exp
+	
+	if experience < next_level:
+		audio.stream = SFX_ADD_EXP
+		audio.pitch_scale = .69 + float(experience) / next_level
+		audio.play()
+	else:
+		ding_audio.stream = SFX_DING
+		ding_audio.pitch_scale = .8 + randf_range(-0.1, 0.1)
+		ding_audio.play()
 		next_level += 2
-		experience = next_level
+		experience = 0
 		max_value = next_level
 		_ding()
-	
-	exp_label.clear()
-	exp_label.append_text("[center]%s[/center]" % str(next_level - experience))
+		_cycle_card_on_display()
+
+	value = experience
+
+func _cycle_card_on_display():
+	display_card.data = Card.Data.good()
+	Utils.jelly_scale(display_card, .4)
 
 func _ding():
 	if deck == null:
 		return
 	
-	var card_data = Card.Data.good()
+	var card_data = display_card.data
 	# Find the world position of the exp_progress, which is a UI element
 	var origin = get_tree().root.get_canvas_transform().affine_inverse() * (position + (get_rect().size / 2))
 

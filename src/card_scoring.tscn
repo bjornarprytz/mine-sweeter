@@ -33,3 +33,6 @@ layout_mode = 2
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="Audio" type="AudioStreamPlayer" parent="."]
+volume_db = -10.0

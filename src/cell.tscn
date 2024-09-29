@@ -74,7 +74,7 @@ texture = ExtResource("5_db5xf")
 
 [node name="ScoreHighlight" type="CPUParticles2D" parent="."]
 unique_name_in_owner = true
-emitting = false
+visible = false
 amount = 6
 lifetime = 2.0
 explosiveness = 0.3

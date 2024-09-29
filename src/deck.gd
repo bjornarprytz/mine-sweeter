@@ -2,7 +2,7 @@ class_name Deck
 extends Control
 
 const SFX_HURT = preload("res://assets/audio/hurt_c_08-102842.mp3")
-const SFX_ADD = preload("res://assets/audio/water-droplet-5-165635.mp3")
+const SFX_ADD = preload("res://assets/audio/flipcard.wav")
 
 @onready var label: RichTextLabel = %Label
 @onready var explosion: CPUParticles2D = $Explosion

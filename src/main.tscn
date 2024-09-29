@@ -38,18 +38,42 @@ grow_horizontal = 0
 grow_vertical = 0
 
 [node name="ScoreContainer" type="PanelContainer" parent="CanvasLayer"]
+unique_name_in_owner = true
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -102.5
-offset_right = 102.5
+offset_left = -149.0
+offset_right = 149.0
 offset_bottom = 75.0
 grow_horizontal = 2
 
-[node name="ScoreLabel" type="RichTextLabel" parent="CanvasLayer/ScoreContainer"]
+[node name="MarginContainer" type="MarginContainer" parent="CanvasLayer/ScoreContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 5
+theme_override_constants/margin_top = 5
+theme_override_constants/margin_right = 5
+theme_override_constants/margin_bottom = 5
+
+[node name="HBoxContainer" type="HBoxContainer" parent="CanvasLayer/ScoreContainer/MarginContainer"]
+layout_mode = 2
+
+[node name="Star1" type="TextureRect" parent="CanvasLayer/ScoreContainer/MarginContainer/HBoxContainer"]
+modulate = Color(0.823529, 0.74902, 0, 1)
+layout_mode = 2
+texture = ExtResource("7_gd3fw")
+expand_mode = 2
+
+[node name="ScoreLabel" type="RichTextLabel" parent="CanvasLayer/ScoreContainer/MarginContainer/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 3
 fit_content = true
+
+[node name="Star2" type="TextureRect" parent="CanvasLayer/ScoreContainer/MarginContainer/HBoxContainer"]
+modulate = Color(0.823529, 0.74902, 0, 1)
+layout_mode = 2
+texture = ExtResource("7_gd3fw")
+expand_mode = 2
 
 [node name="ExpProgress" parent="CanvasLayer" node_paths=PackedStringArray("deck") instance=ExtResource("3_6vy86")]
 unique_name_in_owner = true
@@ -96,7 +120,7 @@ offset_top = 200.0
 offset_right = 226.5
 offset_bottom = 296.0
 grow_horizontal = 2
-theme_override_colors/default_color = Color(0.541176, 0, 0.737255, 1)
+theme_override_colors/default_color = Color(0.954353, 0.000405068, 0.884475, 1)
 bbcode_enabled = true
 text = "[center][wave freq=4]You stepped on a mine 
 and ran out of cards"
@@ -222,6 +246,8 @@ map = NodePath("../Map")
 
 [node name="Map" parent="." instance=ExtResource("3_sidb8")]
 unique_name_in_owner = true
+
+[node name="Audio" type="AudioStreamPlayer" parent="."]
 
 [connection signal="pressed" from="CanvasLayer/GameOver/CenterContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hints" to="." method="_on_close_hints_pressed"]
