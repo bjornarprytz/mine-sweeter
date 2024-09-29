@@ -248,6 +248,7 @@ map = NodePath("../Map")
 unique_name_in_owner = true
 
 [node name="Audio" type="AudioStreamPlayer" parent="."]
+volume_db = -10.0
 
 [connection signal="pressed" from="CanvasLayer/GameOver/CenterContainer/RestartButton" to="." method="_on_restart_button_pressed"]
 [connection signal="pressed" from="CanvasLayer/Hints" to="." method="_on_close_hints_pressed"]
