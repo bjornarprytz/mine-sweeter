@@ -115,6 +115,7 @@ func _add_score(value: int):
 	audio.play()
 
 func _on_restart_button_pressed() -> void:
+	Game.first_cell_revealed = false
 	get_tree().change_scene_to_file("res://loading_screen.tscn")
 
 func _on_close_hints_pressed() -> void:
